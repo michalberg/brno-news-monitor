@@ -1,6 +1,32 @@
 // Zelený radar - Client-side JS
 
+// Dark mode toggle (runs before DOMContentLoaded to avoid flash)
+(function() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (saved === 'dark' || (!saved && prefersDark)) {
+    document.documentElement.classList.add('theme-dark');
+  } else if (saved === 'light') {
+    document.documentElement.classList.add('theme-light');
+  }
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
+  // Dark mode toggle button
+  const toggle = document.getElementById('theme-toggle');
+  if (toggle) {
+    const updateIcon = () => {
+      toggle.textContent = document.documentElement.classList.contains('theme-dark') ? '☀️' : '🌙';
+    };
+    updateIcon();
+    toggle.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('theme-dark');
+      document.documentElement.classList.toggle('theme-light', !isDark);
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      updateIcon();
+    });
+  }
+
   // Smooth scroll to sections via hash links
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
