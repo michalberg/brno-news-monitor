@@ -137,7 +137,7 @@
             <!-- All days of month -->
             {% for day_num in range(1, days_in_month + 1) %}
             {% if day_num in days_with_data %}
-            <a href="{{ '/%04d/%02d/%02d.html' | format(year, month, day_num) }}"
+            <a href="{{ base_url }}/{{ '%04d/%02d/%02d.html' | format(year, month, day_num) }}"
                class="cal-day has-data{% if today_day == day_num %} today{% endif %}">
                 <span class="cal-day-num">{{ day_num }}</span>
                 <span class="cal-day-dot"></span>
