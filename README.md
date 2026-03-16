@@ -1,19 +1,21 @@
 # Zelený radar
 
-Automatický systém pro sledování brněnského zpravodajství s důrazem na komunální politiku. Každý den v 7:00 stahuje RSS feedy, scrapuje weby a Google Alerts, analyzuje obsah pomocí Claude AI a generuje přehledné HTML stránky publikované přes GitHub Pages.
+Automatický systém pro sledování brněnského zpravodajství s důrazem na komunální politiku. Každý den v 7:00 stahuje RSS feedy, scrapuje weby a Google Alerts, analyzuje obsah pomocí Claude AI a generuje přehledné HTML stránky publikované přes GitHub Pages. V hlavičce zobrazuje aktuální statistiky dotazníku a petice.
 
 **Web:** https://michalberg.github.io/brno-news-monitor/
 
 ## Funkce
 
-- **Automatické stahování** – RSS feedy, webové zdroje bez RSS (Brněnská Drbna, Novinky.cz) a Google Alerts
+- **Automatické stahování** – RSS feedy, webové zdroje bez RSS a Google Alerts
 - **AI analýza** – Claude Haiku kategorizuje každý článek, přiřazuje relevanci 1–10, identifikuje sledované osoby a tvoří česká shrnutí
 - **Manažerské shrnutí dne** – 3 nejdůležitější věci z komunální politiky s přímými odkazy
-- **Sledování osob** – Monitorování zmínek politiků a dalších subjektů (Kometa, Zbrojovka, DPMB aj.)
-- **Emailové notifikace** – Přehled odesílán každý den na nakonfigurovaný email
+- **Sledování osob** – Monitorování zmínek politiků a dalších subjektů
+- **Emailové notifikace** – Denní přehled odesílán na nakonfigurovaný email
+- **Statistiky v hlavičce** – Počty odpovědí dotazníku (jakebrno.cz) a podpisů petice (petice.online/saliny)
 - **Deduplication** – Každý článek zobrazen pouze jednou i při opakovaném spuštění
 - **GitHub Pages** – Výsledky automaticky publikovány jako statické HTML
 - **Archiv** – Měsíční kalendář s proklikávatelnými dny
+- **Tmavý režim** – Přepínač v hlavičce, respektuje systémové nastavení
 
 ## Požadavky
 
@@ -34,7 +36,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 export ANTHROPIC_API_KEY="sk-ant-..."
-export SMTP_USER="radar.brno@zeleni.cz"
+export SMTP_USER="..."
 export SMTP_PASSWORD="..."
 
 python scripts/fetch_rss.py --run manual
@@ -51,9 +53,10 @@ Vygenerované stránky jsou v adresáři `docs/`.
 
 | Secret | Popis |
 |--------|-------|
-| `ANTHROPIC_API_KEY` | Anthropic API klíč z console.anthropic.com |
-| `SMTP_USER` | Email odesílatele (`radar.brno@zeleni.cz`) |
+| `ANTHROPIC_API_KEY` | Anthropic API klíč |
+| `SMTP_USER` | Email odesílatele |
 | `SMTP_PASSWORD` | SMTP heslo |
+| `ACTION_NETWORK_API` | API klíč pro Action Network (statistiky petice) |
 
 ## Nastavení GitHub Pages (jednorázově)
 
@@ -102,12 +105,13 @@ brno-news-monitor/
 ├── scripts/
 │   ├── fetch_rss.py          # Stahování RSS, Google Alerts a web scraping
 │   ├── analyze.py            # Analýza článků přes Claude API
-│   ├── generate_html.py      # Generování HTML z Jinja2 šablon
+│   ├── generate_html.py      # Generování HTML + stahování live statistik
 │   └── send_email.py         # Odesílání emailových notifikací
 ├── templates/
 │   ├── daily.html            # Denní přehled
 │   ├── month.html            # Měsíční kalendář
-│   └── index.html            # Hlavní stránka
+│   ├── index.html            # Hlavní stránka
+│   └── email.html            # Emailová šablona
 ├── docs/                     # Výstup pro GitHub Pages
 │   ├── index.html
 │   ├── YYYY/MM/DD.html       # Denní přehledy
@@ -123,8 +127,8 @@ brno-news-monitor/
 
 1. **GitHub Actions** spustí `daily.yml` každý den v 7:00 CET
 2. `fetch_rss.py` stáhne zdroje, odfiltruje duplicity a uloží `articles.json`
-3. `analyze.py` odešle články v dávkách (max 30) do Claude Haiku, výsledek uloží jako `analysis.json`
-4. `generate_html.py` vygeneruje `docs/YYYY/MM/DD.html`, měsíční přehled a `index.html`
+3. `analyze.py` odešle články v dávkách do Claude Haiku, výsledek uloží jako `analysis.json`
+4. `generate_html.py` vygeneruje stránky a stáhne live statistiky dotazníku a petice
 5. `send_email.py` odešle HTML přehled na nakonfigurovaný email
 6. Workflow commitne `docs/` a `data/` a pushne do `main`
 7. GitHub Pages automaticky publikuje nový obsah
