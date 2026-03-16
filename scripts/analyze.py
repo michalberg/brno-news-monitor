@@ -256,10 +256,7 @@ INSTRUKCE:
 3. Identifikuj zminky sledovanych osob a subjektu
 4. Vytvor kratke ceske shrnuti kazdeho clanku (max 150 znaku)
 5. Ignoruj clanky bez vztahu k Brnu nebo JMK
-6. Pole "managerske_shrnuti": Toto je manažerský briefing PRO KOMUNÁLNÍ POLITIKU BRNA. Zaměř se VÝHRADNĚ na věci relevantní pro komunální politiku a veřejnou správu. Pravidla:
-   - hlavni_body: PŘESNĚ 3 položky (nebo méně pokud není dost politicky relevantních zpráv), každá jako objekt s "text" (jedna stručná věta co se stalo) a "link" (URL přímo odpovídajícího článku ze seznamu výše). POUZE komunální politika: rozhodnutí rady/zastupitelstva, investice města, klíčové projekty, zmínky sledovaných politiků, závažné věci fungování Brna. NEZAHRNUJ obecnou dopravu, ekonomiku, kulturu ani sport. Pokud takové zprávy NEJSOU, pole nech PRÁZDNÉ [].
-   - uroven_dulezitosti: "vysoka" = jsou komunálněpolitické zprávy nebo zmínky sledovaných osob; "stredni" = jsou důležité infrastrukturní zprávy dotýkající se rozhodnutí města; "nizka" = žádné komunálně-politické zprávy.
-   - sledovane_osoby_dnes: jen jména ze seznamu SLEDOVANYCH OSOB která se SKUTEČNĚ vyskytují v článcích tohoto batche.
+6. Pole "managerske_shrnuti" nech jako prázdný objekt: {{}}.
 7. Kategorie "doprava": zahrn VŠECHNY clanky tykajici se dopravy v sirokem smyslu — auta, MHD, tramvaje, autobusy, vlaky, ale TAKÉ cyklisticka doprava, cyklostezky, chodci, pesi zona, chodnik, prechody pro chodce. Vse co se tyka pohybu lidi a vozidel po meste.
 8. Kategorie "sport": zahrn POUZE clanky tykajici se stadionu, sportovni haly nebo jejich vystavby/rekonstrukce (napr. hala Komety, fotbalovy stadion Za Luzankami). Ostatni sportovni zpravy (vysledky zapasu, prestupy hracu apod.) uplne vynech — do zadne kategorie je nezarazuj.
 7. Kategorie "kriminalita": zahrn POUZE clanky, kde je kriminalita spojena s nekterym ze sledovanych politiku nebo verejnych cinitel. Beznou kriminalitu (kradeze, nehody, nasilne trestne ciny bez politickeho kontextu) uplne vynech — do zadne kategorie ji nezarazuj.
@@ -295,15 +292,7 @@ VRAT POUZE VALIDNI JSON v tomto formatu (bez markdown backticks):
       {{"title": "...", "link": "...", "context": "kratky kontext"}}
     ]
   }},
-  "managerske_shrnuti": {{
-    "uroven_dulezitosti": "vysoka|stredni|nizka",
-    "hlavni_body": [
-      {{"text": "Jedna věta co se stalo.", "link": "https://url-clanku"}},
-      {{"text": "Druhá věta co se stalo.", "link": "https://url-clanku"}},
-      {{"text": "Třetí věta co se stalo.", "link": "https://url-clanku"}}
-    ],
-    "sledovane_osoby_dnes": ["jméno osoby pokud se vyskytuje ve zprávách, jinak prázdné pole"]
-  }},
+  "managerske_shrnuti": {{}},
   "stats": {{
     "total_analyzed": 0,
     "total_relevant": 0,
@@ -382,6 +371,61 @@ def analyze_batch(client: anthropic.Anthropic, articles: list, config: dict) -> 
     return result
 
 
+def generate_managerske_shrnuti(client: anthropic.Anthropic, merged: dict, config: dict) -> dict:
+    """Generate managerske_shrnuti from the top komunalni_politika articles after full merge."""
+    watched_politicians = config["watched_names"]["politicians"]
+    komunalni = merged.get("categories", {}).get("komunalni_politika", [])[:10]
+    all_persons = list(merged.get("person_mentions", {}).keys())
+
+    if not komunalni:
+        return {
+            "uroven_dulezitosti": "nizka",
+            "hlavni_body": [],
+            "sledovane_osoby_dnes": [],
+        }
+
+    articles_text = ""
+    for i, a in enumerate(komunalni, 1):
+        articles_text += f"\n{i}. {a['title']}\n   Shrnutí: {a.get('summary_cs', '')}\n   URL: {a['link']}\n"
+
+    persons_today = [p for p in watched_politicians if p in all_persons]
+
+    prompt = f"""Jsi analytik komunální politiky Brna. Na základě těchto článků vytvoř manažerský briefing.
+
+SLEDOVANÍ POLITICI ZMÍNĚNÍ DNES: {', '.join(persons_today) if persons_today else 'nikdo'}
+
+NEJDŮLEŽITĚJŠÍ ČLÁNKY KOMUNÁLNÍ POLITIKY (seřazené podle relevance):
+{articles_text}
+
+Vrať POUZE validní JSON (bez markdown):
+{{
+  "uroven_dulezitosti": "vysoka|stredni|nizka",
+  "hlavni_body": [
+    {{"text": "Jedna věta co se stalo.", "link": "https://url"}},
+    {{"text": "Druhá věta.", "link": "https://url"}},
+    {{"text": "Třetí věta.", "link": "https://url"}}
+  ],
+  "sledovane_osoby_dnes": ["Jméno Příjmení"]
+}}
+
+Pravidla:
+- hlavni_body: max 3 položky, jen pokud jsou skutečně komunálněpolitické zprávy
+- uroven_dulezitosti: "vysoka" pokud jsou zmínky sledovaných politiků nebo klíčová rozhodnutí; "stredni" pro běžné komunální zprávy; "nizka" pokud nic výrazného
+- sledovane_osoby_dnes: jen osoby ze seznamu které se skutečně vyskytují"""
+
+    model = config["settings"]["summary_model"]
+    message = client.messages.create(
+        model=model,
+        max_tokens=1024,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    try:
+        return extract_json(message.content[0].text)
+    except Exception as e:
+        logger.warning(f"Failed to parse managerske_shrnuti: {e}")
+        return {"uroven_dulezitosti": "nizka", "hlavni_body": [], "sledovane_osoby_dnes": []}
+
+
 def merge_analysis_results(results: list) -> dict:
     if len(results) == 1:
         return results[0]
@@ -427,31 +471,6 @@ def merge_analysis_results(results: list) -> dict:
         merged["stats"]["komunalni_politika_count"] += stats.get(
             "komunalni_politika_count", 0
         )
-
-        # Merge managerske_shrnuti: first batch is primary, subsequent batches add unique body points
-        ms = result.get("managerske_shrnuti", {})
-        existing_ms = merged["managerske_shrnuti"]
-        if ms.get("hlavni_body"):
-            existing_body = existing_ms.get("hlavni_body", [])
-            existing_text = {
-                (b["text"] if isinstance(b, dict) else b).lower()[:40]
-                for b in existing_body
-            }
-            for bod in ms["hlavni_body"]:
-                text = (bod["text"] if isinstance(bod, dict) else bod).lower()[:40]
-                if text not in existing_text:
-                    existing_body.append(bod)
-                    existing_text.add(text)
-            existing_ms["hlavni_body"] = existing_body
-        if ms.get("sledovane_osoby_dnes") and existing_ms.get("sledovane_osoby_dnes"):
-            existing_ms["sledovane_osoby_dnes"] = list(set(
-                existing_ms["sledovane_osoby_dnes"] + ms["sledovane_osoby_dnes"]
-            ))
-        # Use highest priority level
-        priority_order = {"vysoka": 3, "stredni": 2, "nizka": 1}
-        if priority_order.get(ms.get("uroven_dulezitosti", "nizka"), 0) > priority_order.get(existing_ms.get("uroven_dulezitosti", "nizka"), 0):
-            existing_ms["uroven_dulezitosti"] = ms["uroven_dulezitosti"]
-            existing_ms["nejdulezitejsi_zprava"] = ms.get("nejdulezitejsi_zprava", "")
 
     # Sort articles in each category by relevance
     for category in merged["categories"]:
@@ -564,6 +583,9 @@ def main():
     final_result = merge_analysis_results(results)
     final_result["run_type"] = args.run
     final_result["analyzed_at"] = datetime.now().isoformat()
+
+    logger.info("Generating managerske_shrnuti from merged komunalni_politika articles")
+    final_result["managerske_shrnuti"] = generate_managerske_shrnuti(client, final_result, config)
 
     # Save to run dir
     run_dir = Path(run_dir_str)
