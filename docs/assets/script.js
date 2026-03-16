@@ -11,23 +11,23 @@
   }
 })();
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Dark mode toggle button
+// Dark mode toggle button (runs immediately — script is at bottom of body so DOM is ready)
+(function() {
   const toggle = document.getElementById('theme-toggle');
-  if (toggle) {
-    const updateIcon = () => {
-      toggle.textContent = document.documentElement.classList.contains('theme-dark') ? '☀️' : '🌙';
-    };
+  if (!toggle) return;
+  const updateIcon = () => {
+    toggle.textContent = document.documentElement.classList.contains('theme-dark') ? '☀️' : '🌙';
+  };
+  updateIcon();
+  toggle.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('theme-dark');
+    document.documentElement.classList.toggle('theme-light', !isDark);
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
     updateIcon();
-    toggle.addEventListener('click', () => {
-      const isDark = document.documentElement.classList.toggle('theme-dark');
-      document.documentElement.classList.toggle('theme-light', !isDark);
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      updateIcon();
-      console.log('[theme] toggled, isDark=', isDark, 'html classes=', document.documentElement.className);
-    });
-  }
+  });
+})();
 
+document.addEventListener('DOMContentLoaded', () => {
   // Smooth scroll to sections via hash links
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
