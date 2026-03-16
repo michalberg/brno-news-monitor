@@ -34,7 +34,7 @@ def load_config() -> dict:
 
 
 def fetch_action_network_signatures():
-    api_key = os.environ.get("ACTION_NETWORK_API")
+    api_key = os.environ.get("ACTION_NETWORK_API", "").strip()
     if not api_key:
         logger.warning("ACTION_NETWORK_API not set, skipping")
         return None
