@@ -74,6 +74,21 @@ def get_keyword_filters(config: dict) -> dict:
     return filters
 
 
+def filter_unwatched_persons(analysis: dict, config: dict) -> dict:
+    """Remove person_mentions for anyone not in the watched list."""
+    watched_politicians = [p.lower() for p in config["watched_names"].get("politicians", [])]
+    watched_other = [get_watched_other_names(config)[i].lower() for i in range(len(get_watched_other_names(config)))]
+    all_watched = set(watched_politicians + watched_other)
+
+    unwanted = [name for name in list(analysis.get("person_mentions", {}).keys())
+                if name.lower() not in all_watched]
+    for name in unwanted:
+        del analysis["person_mentions"][name]
+        logger.info(f"Removed unwatched person from mentions: {name}")
+
+    return analysis
+
+
 def apply_keyword_filters(analysis: dict, keyword_filters: dict) -> dict:
     """Remove person_mentions entries that don't contain required keywords."""
     for entity, required_keywords in keyword_filters.items():
@@ -361,6 +376,7 @@ def analyze_batch(client: anthropic.Anthropic, articles: list, config: dict) -> 
 
     # Post-process: filter sport and kriminalita categories
     result = apply_category_filters(result, config)
+    result = filter_unwatched_persons(result, config)
 
     # Post-process: keep only political content in managerske_shrnuti
     result = filter_managerske_shrnuti(result, config)
