@@ -147,7 +147,9 @@
   border: 1px solid rgba(255,255,255,0.2);
   border-radius: 6px;
   padding: 0.25rem 0.65rem;
+  text-decoration: none;
 }
+.petition-stats:hover { background: rgba(255,255,255,0.2); }
 .petition-stats strong { color: #fff; }
 @media (max-width: 600px) { .petition-stats { display: none; } }
 

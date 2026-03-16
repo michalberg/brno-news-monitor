@@ -14,7 +14,7 @@
         <nav class="header-nav">
             <a href="{{ base_url }}/">Hlavní stránka</a>
             <a href="{{ nav.month_path }}">Měsíční přehled</a>
-            {% if petition_stats %}<span class="petition-stats">✍️ Dotazník: <strong>{{ petition_stats.dnes }}</strong> včera / <strong>{{ petition_stats.celkem }}</strong> celkem</span>{% endif %}
+            {% if petition_stats %}<a href="https://jakebrno.cz/admin.php" class="petition-stats" target="_blank" rel="noopener noreferrer">✍️ Dotazník: <strong>{{ petition_stats.dnes }}</strong> včera / <strong>{{ petition_stats.celkem }}</strong> celkem</a>{% endif %}
             <button class="theme-toggle" id="theme-toggle" title="Přepnout režim">🌙</button>
         </nav>
     </div>
@@ -34,7 +34,7 @@
         <div class="stats-bar">
             <span class="stat-pill">📰 <strong>{{ total_articles }}</strong> článků</span>
             <span class="stat-pill">🏛️ <strong>{{ stats.komunalni_politika_count }}</strong> komunální politika</span>
-            {% if person_mentions %}<span class="stat-pill">👤 <strong>{{ person_mentions | length }}</strong> sledovaných osob</span>{% endif %}
+            {% if person_mentions %}<span class="stat-pill">👤 <strong>{{ person_mentions | length }}</strong> sledovaných osob</a>{% endif %}
         </div>
     </div>
 
@@ -116,7 +116,7 @@
                     {% for mention in mentions[:4] %}
                     <li>
                         <a href="{{ mention.link }}" target="_blank" rel="noopener noreferrer">{{ mention.title }}</a>
-                        {% if mention.context %}<span class="mention-context">{{ mention.context }}</span>{% endif %}
+                        {% if mention.context %}<span class="mention-context">{{ mention.context }}</a>{% endif %}
                     </li>
                     {% endfor %}
                 </ul>

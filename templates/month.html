@@ -98,7 +98,7 @@
         <a href="{{ base_url }}/" class="logo">🏙️ Zelený radar</a>
         <nav class="header-nav">
             <a href="{{ base_url }}/">Hlavní stránka</a>
-            {% if petition_stats %}<span class="petition-stats">✍️ Dotazník: <strong>{{ petition_stats.dnes }}</strong> včera / <strong>{{ petition_stats.celkem }}</strong> celkem</span>{% endif %}
+            {% if petition_stats %}<a href="https://jakebrno.cz/admin.php" class="petition-stats" target="_blank" rel="noopener noreferrer">✍️ Dotazník: <strong>{{ petition_stats.dnes }}</strong> včera / <strong>{{ petition_stats.celkem }}</strong> celkem</a>{% endif %}
             <button class="theme-toggle" id="theme-toggle" title="Přepnout režim">🌙</button>
         </nav>
     </div>
