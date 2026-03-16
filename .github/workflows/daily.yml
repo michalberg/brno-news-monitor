@@ -40,6 +40,8 @@ jobs:
         run: python scripts/analyze.py --run daily
 
       - name: Generate HTML pages
+        env:
+          ACTION_NETWORK_API: ${{ secrets.ACTION_NETWORK_API }}
         run: python scripts/generate_html.py --run daily
 
       - name: Send email notification

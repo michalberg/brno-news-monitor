@@ -6,6 +6,7 @@ generate_html.py - Generování HTML stránek z výsledků analýzy
 import argparse
 import json
 import logging
+import os
 import sys
 import urllib.request
 from datetime import datetime, timedelta
@@ -30,6 +31,22 @@ TEMPLATES_DIR = SCRIPT_DIR / "templates"
 def load_config() -> dict:
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def fetch_action_network_signatures():
+    api_key = os.environ.get("ACTION_NETWORK_API")
+    if not api_key:
+        logger.warning("ACTION_NETWORK_API not set, skipping")
+        return None
+    try:
+        url = "https://actionnetwork.org/api/v2/petitions/603ad1fa-9d5a-4892-9558-87d7d04e4337/"
+        req = urllib.request.Request(url, headers={"OSDI-API-Token": api_key})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+            return data.get("total_signatures") or data.get("signatures_count")
+    except Exception as e:
+        logger.warning(f"Could not fetch Action Network signatures: {e}")
+        return None
 
 
 def fetch_petition_stats() -> dict:
@@ -82,7 +99,7 @@ def get_nav_dates(date: datetime, base_url: str) -> dict:
     }
 
 
-def generate_daily_page(env: Environment, analysis: dict, config: dict, run_type: str, petition_stats: dict = None):
+def generate_daily_page(env: Environment, analysis: dict, config: dict, run_type: str, petition_stats: dict = None, an_signatures: int = None):
     tz = ZoneInfo(config["settings"]["timezone"])
     now = datetime.now(tz)
 
@@ -134,6 +151,7 @@ def generate_daily_page(env: Environment, analysis: dict, config: dict, run_type
             "ostatni": "📰",
         },
         "petition_stats": petition_stats,
+        "an_signatures": an_signatures,
     }
 
     html = template.render(**context)
@@ -150,7 +168,7 @@ def generate_daily_page(env: Environment, analysis: dict, config: dict, run_type
     return main_output
 
 
-def generate_month_page(env: Environment, config: dict, petition_stats: dict = None):
+def generate_month_page(env: Environment, config: dict, petition_stats: dict = None, an_signatures: int = None):
     import calendar as cal_module
     tz = ZoneInfo(config["settings"]["timezone"])
     now = datetime.now(tz)
@@ -202,6 +220,7 @@ def generate_month_page(env: Environment, config: dict, petition_stats: dict = N
         "assets_path": "../../assets",
         "base_url": base_url,
         "petition_stats": petition_stats,
+        "an_signatures": an_signatures,
     }
 
     html = template.render(**context)
@@ -212,7 +231,7 @@ def generate_month_page(env: Environment, config: dict, petition_stats: dict = N
     logger.info(f"Generated month page: {output_file}")
 
 
-def generate_index_page(env: Environment, config: dict, latest_analysis: dict, petition_stats: dict = None):
+def generate_index_page(env: Environment, config: dict, latest_analysis: dict, petition_stats: dict = None, an_signatures: int = None):
     tz = ZoneInfo(config["settings"]["timezone"])
     now = datetime.now(tz)
 
@@ -278,6 +297,7 @@ def generate_index_page(env: Environment, config: dict, latest_analysis: dict, p
         "watched_politicians": watched_politicians,
         "watched_other": watched_other,
         "petition_stats": petition_stats,
+        "an_signatures": an_signatures,
     }
 
     html = template.render(**context)
@@ -354,9 +374,12 @@ def main():
     petition_stats = fetch_petition_stats()
     logger.info(f"Petition stats: {petition_stats}")
 
-    generate_daily_page(env, analysis, config, args.run, petition_stats)
-    generate_month_page(env, config, petition_stats)
-    generate_index_page(env, config, analysis, petition_stats)
+    an_signatures = fetch_action_network_signatures()
+    logger.info(f"Action Network signatures: {an_signatures}")
+
+    generate_daily_page(env, analysis, config, args.run, petition_stats, an_signatures)
+    generate_month_page(env, config, petition_stats, an_signatures)
+    generate_index_page(env, config, analysis, petition_stats, an_signatures)
 
     logger.info("HTML generation complete")
     return 0
