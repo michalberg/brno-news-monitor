@@ -38,6 +38,7 @@ def fetch_action_network_signatures():
     if not api_key:
         logger.warning("ACTION_NETWORK_API not set, skipping")
         return None
+    logger.info(f"ACTION_NETWORK_API key starts with: {api_key[:6]}... (len={len(api_key)})")
     try:
         url = "https://actionnetwork.org/api/v2/petitions/603ad1fa-9d5a-4892-9558-87d7d04e4337/"
         req = urllib.request.Request(url, headers={"OSDI-API-Token": api_key})
