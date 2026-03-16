@@ -143,8 +143,8 @@ web_scrape:
 notifications:
   enabled: true
   recipients:
-    - "DOPLNIT_EMAIL"
+    - "opavak@gmail.com"
   smtp:
-    host: "smtp.gmail.com"
+    host: "mail.zeleni.cz"
     port: 587
     use_tls: true

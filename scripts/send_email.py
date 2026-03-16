@@ -38,20 +38,7 @@ def load_html_content(config: dict, run_type: str):
 
     output_dir = SCRIPT_DIR / config["settings"]["output_dir"]
 
-    if run_type == "morning":
-        html_file = (
-            output_dir / now.strftime("%Y/%m") / f"{now.strftime('%d')}-morning.html"
-        )
-    elif run_type == "afternoon":
-        html_file = (
-            output_dir / now.strftime("%Y/%m") / f"{now.strftime('%d')}-afternoon.html"
-        )
-    else:
-        html_file = output_dir / now.strftime("%Y/%m") / f"{now.strftime('%d')}.html"
-
-    # Fallback to main daily file
-    if not html_file.exists():
-        html_file = output_dir / now.strftime("%Y/%m") / f"{now.strftime('%d')}.html"
+    html_file = output_dir / now.strftime("%Y/%m") / f"{now.strftime('%d')}.html"
 
     if not html_file.exists():
         logger.error(f"HTML file not found: {html_file}")
@@ -132,7 +119,7 @@ def main():
     parser = argparse.ArgumentParser(description="Send email notifications")
     parser.add_argument(
         "--run",
-        choices=["morning", "afternoon", "daily", "manual"],
+        choices=["daily", "manual"],
         default="manual",
     )
     args = parser.parse_args()
