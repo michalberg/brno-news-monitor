@@ -69,10 +69,8 @@ def send_email(config: dict, html_content: str, run_type: str) -> bool:
     now = datetime.now(tz)
 
     run_labels = {
-        "morning": "ranní přehled",
-        "afternoon": "odpolední přehled",
-        "daily": "denní souhrn",
-        "manual": "manuální přehled",
+        "daily": "přehled zpráv",
+        "manual": "přehled zpráv",
     }
 
     subject = f"Zelený radar - {run_labels.get(run_type, run_type)} {now.strftime('%d. %m. %Y')}"
