@@ -71,11 +71,7 @@
 
   <!-- DATE BAR -->
   <tr>
-    <td style="background:#166534;padding:8px 24px;">
-      <span style="color:#bbf7d0;font-size:13px;">{{ date_str }}</span>
-      <span style="color:#86efac;font-size:13px;margin-left:10px;">📰 {{ total_articles }} článků</span>
-      {% if stats.komunalni_politika_count %}<span style="color:#86efac;font-size:13px;margin-left:10px;">🏛️ {{ stats.komunalni_politika_count }} komunální politika</span>{% endif %}
-    </td>
+    <td style="background:#166534;padding:8px 24px;white-space:nowrap;font-size:13px;"><span style="color:#bbf7d0;">{{ date_str }}</span>&nbsp;&nbsp;<span style="color:#86efac;">📰 {{ total_articles }} článků</span>{% if stats.komunalni_politika_count %}&nbsp;&nbsp;<span style="color:#86efac;">🏛️ {{ stats.komunalni_politika_count }} komunální politika</span>{% endif %}</td>
   </tr>
 
   <!-- SHRNUTÍ DNE -->
