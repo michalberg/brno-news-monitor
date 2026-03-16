@@ -1,26 +1,68 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="cs" xmlns:v="urn:schemas-microsoft-com:vml">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
   <title>Zelený radar – {{ date_str }}</title>
-</head>
-<body style="margin:0;padding:0;background:#f4f6f9;font-family:Arial,Helvetica,sans-serif;color:#1a202c;">
+  <style>
+    /* Force light mode in email clients that support it */
+    :root { color-scheme: light; }
 
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:24px 0;">
+    body { margin:0; padding:0; background:#f0fdf4; font-family:Arial,Helvetica,sans-serif; }
+    img  { border:0; display:block; }
+    a    { color:#166534; }
+
+    /* Responsive */
+    @media screen and (max-width:620px) {
+      .email-wrap  { width:100% !important; }
+      .email-inner { padding:0 !important; }
+      .col-half    { display:block !important; width:100% !important; }
+      .mobile-pad  { padding:12px 16px !important; }
+      .hide-mobile { display:none !important; }
+    }
+
+    /* Dark mode – Gmail uses [data-ogsc], Apple Mail uses prefers-color-scheme */
+    @media (prefers-color-scheme: dark) {
+      body, .bg-outer { background:#0a1a0f !important; }
+      .bg-card        { background:#0f2a18 !important; }
+      .txt-main       { color:#e2e8f0 !important; }
+      .txt-muted      { color:#94a3b8 !important; }
+      .txt-light      { color:#64748b !important; }
+      .border-row     { border-color:#1a3d24 !important; }
+      .source-pill    { background:#1a3d24 !important; color:#86efac !important; }
+      .card-row       { background:#0f2a18 !important; border-color:#1a3d24 !important; }
+      .summary-box    { background:#051409 !important; }
+      .summary-box-warn { background:#1c1400 !important; }
+      .summary-box-red  { background:#1c0505 !important; }
+      .footer-bg      { background:#051409 !important; }
+    }
+    /* Gmail dark mode selectors */
+    [data-ogsc] body, [data-ogsc] .bg-outer { background:#0a1a0f !important; }
+    [data-ogsc] .bg-card   { background:#0f2a18 !important; }
+    [data-ogsc] .txt-main  { color:#e2e8f0 !important; }
+    [data-ogsc] .txt-muted { color:#94a3b8 !important; }
+    [data-ogsc] .card-row  { background:#0f2a18 !important; border-color:#1a3d24 !important; }
+    [data-ogsc] .footer-bg { background:#051409 !important; }
+  </style>
+</head>
+<body class="bg-outer" style="margin:0;padding:0;background:#f0fdf4;">
+
+<table class="bg-outer" width="100%" cellpadding="0" cellspacing="0" style="background:#f0fdf4;padding:20px 0;">
 <tr><td align="center">
-<table width="620" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+<table class="email-wrap" width="620" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
 
   <!-- HEADER -->
   <tr>
-    <td style="background:#1a56db;padding:20px 28px;">
+    <td style="background:#14532d;padding:18px 24px;">
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
           <td>
-            <a href="https://michalberg.github.io/brno-news-monitor/" style="font-size:20px;font-weight:700;color:#ffffff;text-decoration:none;">🌿 Zelený radar</a>
+            <a href="https://michalberg.github.io/brno-news-monitor/" style="font-size:19px;font-weight:700;color:#ffffff;text-decoration:none;">🌿 Zelený radar</a>
           </td>
-          <td align="right">
-            <a href="{{ web_url }}" style="color:#bfdbfe;font-size:13px;text-decoration:none;">Zobrazit na webu →</a>
+          <td align="right" class="hide-mobile">
+            <a href="{{ web_url }}" style="color:#bbf7d0;font-size:13px;text-decoration:none;">Celý přehled na webu →</a>
           </td>
         </tr>
       </table>
@@ -29,35 +71,38 @@
 
   <!-- DATE BAR -->
   <tr>
-    <td style="background:#1e40af;padding:10px 28px;">
-      <span style="color:#bfdbfe;font-size:13px;">{{ date_str }}</span>
-      <span style="color:#bfdbfe;font-size:13px;margin-left:12px;">📰 {{ total_articles }} článků</span>
-      {% if stats.komunalni_politika_count %}<span style="color:#bfdbfe;font-size:13px;margin-left:12px;">🏛️ {{ stats.komunalni_politika_count }} komunální politika</span>{% endif %}
+    <td style="background:#166534;padding:8px 24px;">
+      <span style="color:#bbf7d0;font-size:13px;">{{ date_str }}</span>
+      <span style="color:#86efac;font-size:13px;margin-left:10px;">📰 {{ total_articles }} článků</span>
+      {% if stats.komunalni_politika_count %}<span style="color:#86efac;font-size:13px;margin-left:10px;">🏛️ {{ stats.komunalni_politika_count }} komunální politika</span>{% endif %}
     </td>
   </tr>
 
-  <!-- MANAŽERSKÉ SHRNUTÍ -->
+  <!-- SHRNUTÍ DNE -->
   {% set ms = managerske_shrnuti %}
   {% if ms and ms.hlavni_body %}
-  {% set bg = '#fef2f2' if ms.uroven_dulezitosti == 'vysoka' else ('#fefce8' if ms.uroven_dulezitosti == 'stredni' else '#f0fdf4') %}
-  {% set border = '#ef4444' if ms.uroven_dulezitosti == 'vysoka' else ('#eab308' if ms.uroven_dulezitosti == 'stredni' else '#22c55e') %}
-  {% set icon = '🔴' if ms.uroven_dulezitosti == 'vysoka' else ('🟡' if ms.uroven_dulezitosti == 'stredni' else '🟢') %}
+  {% if ms.uroven_dulezitosti == 'vysoka' %}
+    {% set sum_bg='#fff5f5' %}{% set sum_border='#ef4444' %}{% set sum_icon='🔴' %}{% set sum_class='summary-box-red' %}
+  {% elif ms.uroven_dulezitosti == 'stredni' %}
+    {% set sum_bg='#fffbeb' %}{% set sum_border='#d97706' %}{% set sum_icon='🟡' %}{% set sum_class='summary-box-warn' %}
+  {% else %}
+    {% set sum_bg='#f0fdf4' %}{% set sum_border='#16a34a' %}{% set sum_icon='🟢' %}{% set sum_class='summary-box' %}
+  {% endif %}
   <tr>
-    <td style="padding:24px 28px 0;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="background:{{ bg }};border-left:4px solid {{ border }};border-radius:0 8px 8px 0;">
-        <tr>
-          <td style="padding:16px 20px;">
-            <div style="font-size:15px;font-weight:700;color:#1a202c;margin-bottom:12px;">{{ icon }} Shrnutí dne</div>
-            {% for bod in ms.hlavni_body %}
-            <div style="display:flex;margin-bottom:8px;">
-              <span style="color:#6b7280;margin-right:8px;flex-shrink:0;">•</span>
-              <span style="font-size:14px;line-height:1.5;">
-                {% if bod.link %}<a href="{{ bod.link }}" style="color:#1a56db;text-decoration:none;">{{ bod.text }}</a>{% else %}{{ bod.text }}{% endif %}
-              </span>
-            </div>
-            {% endfor %}
-          </td>
-        </tr>
+    <td class="mobile-pad" style="padding:20px 24px 0;">
+      <table class="{{ sum_class }}" width="100%" cellpadding="0" cellspacing="0"
+             style="background:{{ sum_bg }};border-left:4px solid {{ sum_border }};border-radius:0 8px 8px 0;">
+        <tr><td style="padding:14px 18px;">
+          <div style="font-size:14px;font-weight:700;color:#1a202c;margin-bottom:10px;" class="txt-main">{{ sum_icon }} Shrnutí dne</div>
+          {% for bod in ms.hlavni_body %}
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:7px;"><tr>
+            <td style="color:#6b7280;padding-right:7px;vertical-align:top;font-size:14px;" class="txt-muted">•</td>
+            <td style="font-size:14px;line-height:1.5;color:#1a202c;" class="txt-main">
+              {% if bod.link %}<a href="{{ bod.link }}" style="color:#15803d;text-decoration:none;">{{ bod.text }}</a>{% else %}{{ bod.text }}{% endif %}
+            </td>
+          </tr></table>
+          {% endfor %}
+        </td></tr>
       </table>
     </td>
   </tr>
@@ -66,14 +111,14 @@
   <!-- SLEDOVANÉ OSOBY -->
   {% if person_mentions %}
   <tr>
-    <td style="padding:20px 28px 0;">
-      <div style="font-size:15px;font-weight:700;color:#1a202c;margin-bottom:10px;">👤 Sledované osoby dnes</div>
+    <td class="mobile-pad" style="padding:18px 24px 0;">
+      <div style="font-size:14px;font-weight:700;color:#1a202c;margin-bottom:10px;border-bottom:1px solid #d1fae5;padding-bottom:6px;" class="txt-main border-row">👤 Sledované osoby dnes</div>
       {% for person, mentions in person_mentions.items() %}{% if mentions %}
-      <div style="margin-bottom:12px;">
-        <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:4px;">{{ person }}</div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:3px;">{{ person }}</div>
         {% for mention in mentions[:2] %}
-        <div style="font-size:13px;color:#6b7280;padding-left:12px;margin-bottom:2px;">
-          → <a href="{{ mention.link }}" style="color:#1a56db;text-decoration:none;">{{ mention.title }}</a>
+        <div style="font-size:12px;color:#6b7280;padding-left:10px;margin-bottom:2px;" class="txt-muted">
+          → <a href="{{ mention.link }}" style="color:#15803d;text-decoration:none;">{{ mention.title }}</a>
         </div>
         {% endfor %}
       </div>
@@ -86,20 +131,19 @@
   {% set komunalni = categories.get('komunalni_politika', []) %}
   {% if komunalni %}
   <tr>
-    <td style="padding:20px 28px 0;">
-      <div style="font-size:15px;font-weight:700;color:#1a202c;border-bottom:2px solid #1a56db;padding-bottom:6px;margin-bottom:12px;">🏛️ Komunální politika</div>
+    <td class="mobile-pad" style="padding:18px 24px 0;">
+      <div style="font-size:14px;font-weight:700;color:#1a202c;border-bottom:2px solid #16a34a;padding-bottom:6px;margin-bottom:12px;" class="txt-main">🏛️ Komunální politika</div>
       {% for article in komunalni[:6] %}
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;border:1px solid #e5e7eb;border-radius:8px;">
-        <tr>
-          <td style="padding:12px 14px;">
-            <div style="margin-bottom:4px;">
-              <span style="font-size:11px;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:12px;font-weight:600;">{{ article.source }}</span>
-              <span style="font-size:11px;color:#9ca3af;margin-left:8px;">{{ article.published | format_date('%d. %m. %H:%M') }}</span>
-            </div>
-            <a href="{{ article.link }}" style="font-size:14px;font-weight:600;color:#1a56db;text-decoration:none;line-height:1.4;display:block;margin-bottom:4px;">{{ article.title }}</a>
-            {% if article.summary_cs %}<div style="font-size:13px;color:#6b7280;line-height:1.4;">{{ article.summary_cs }}</div>{% endif %}
-          </td>
-        </tr>
+      <table class="card-row bg-card" width="100%" cellpadding="0" cellspacing="0"
+             style="margin-bottom:8px;border:1px solid #d1fae5;border-radius:8px;background:#ffffff;">
+        <tr><td class="mobile-pad" style="padding:11px 14px;">
+          <div style="margin-bottom:5px;">
+            <span class="source-pill" style="display:inline-block;font-size:11px;background:#dcfce7;color:#166534;padding:2px 8px;border-radius:12px;font-weight:600;">{{ article.source }}</span>
+            <span class="txt-light" style="font-size:11px;color:#94a3b8;margin-left:6px;">{{ article.published | format_date('%d. %m. %H:%M') }}</span>
+          </div>
+          <a href="{{ article.link }}" style="font-size:13px;font-weight:600;color:#15803d;text-decoration:none;line-height:1.4;display:block;margin-bottom:4px;">{{ article.title }}</a>
+          {% if article.summary_cs %}<div class="txt-muted" style="font-size:12px;color:#6b7280;line-height:1.4;">{{ article.summary_cs }}</div>{% endif %}
+        </td></tr>
       </table>
       {% endfor %}
     </td>
@@ -112,12 +156,12 @@
   {% set articles = categories.get(cat_key, []) %}
   {% if articles %}
   <tr>
-    <td style="padding:16px 28px 0;">
-      <div style="font-size:14px;font-weight:700;color:#374151;border-bottom:1px solid #e5e7eb;padding-bottom:5px;margin-bottom:10px;">{{ cat_icon }} {{ cat_label }}</div>
+    <td class="mobile-pad" style="padding:14px 24px 0;">
+      <div class="txt-main border-row" style="font-size:13px;font-weight:700;color:#374151;border-bottom:1px solid #d1fae5;padding-bottom:4px;margin-bottom:8px;">{{ cat_icon }} {{ cat_label }}</div>
       {% for article in articles[:4] %}
-      <div style="margin-bottom:8px;padding-left:8px;border-left:2px solid #e5e7eb;">
-        <a href="{{ article.link }}" style="font-size:13px;color:#1a56db;text-decoration:none;line-height:1.4;display:block;">{{ article.title }}</a>
-        <span style="font-size:11px;color:#9ca3af;">{{ article.source }}</span>
+      <div style="margin-bottom:7px;padding-left:8px;border-left:2px solid #d1fae5;">
+        <a href="{{ article.link }}" style="font-size:13px;color:#15803d;text-decoration:none;line-height:1.4;display:block;">{{ article.title }}</a>
+        <span class="txt-light" style="font-size:11px;color:#94a3b8;">{{ article.source }}</span>
       </div>
       {% endfor %}
     </td>
@@ -125,17 +169,20 @@
   {% endif %}
   {% endfor %}
 
+  <!-- SPACER -->
+  <tr><td style="height:20px;"></td></tr>
+
   <!-- FOOTER -->
   <tr>
-    <td style="padding:24px 28px;margin-top:16px;border-top:1px solid #e5e7eb;">
+    <td class="footer-bg" style="background:#14532d;padding:16px 24px;">
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
-          <td style="font-size:12px;color:#9ca3af;">
-            Zelený radar · Powered by Claude AI · {{ date_str }}<br>
-            <a href="https://github.com/michalberg/brno-news-monitor" style="color:#9ca3af;">github.com/michalberg/brno-news-monitor</a>
+          <td style="font-size:11px;color:rgba(255,255,255,0.6);">
+            🌿 Zelený radar · {{ date_str }}<br>
+            <a href="https://github.com/michalberg/brno-news-monitor" style="color:rgba(255,255,255,0.45);text-decoration:none;">github.com/michalberg/brno-news-monitor</a>
           </td>
           <td align="right">
-            <a href="{{ web_url }}" style="font-size:12px;color:#1a56db;text-decoration:none;">Celý přehled na webu →</a>
+            <a href="{{ web_url }}" style="font-size:12px;color:#86efac;text-decoration:none;white-space:nowrap;">Web →</a>
           </td>
         </tr>
       </table>
