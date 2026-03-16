@@ -543,7 +543,7 @@ def main():
         with open(latest_analysis_file, "w") as f:
             json.dump(
                 {
-                    "analysis_file": str(analysis_file),
+                    "analysis_file": str(analysis_file.relative_to(SCRIPT_DIR)),
                     "analyzed_at": empty_result["analyzed_at"],
                 },
                 f,
@@ -596,7 +596,7 @@ def main():
     with open(latest_analysis_file, "w") as f:
         json.dump(
             {
-                "analysis_file": str(analysis_file),
+                "analysis_file": str(analysis_file.relative_to(SCRIPT_DIR)),
                 "analyzed_at": final_result["analyzed_at"],
             },
             f,

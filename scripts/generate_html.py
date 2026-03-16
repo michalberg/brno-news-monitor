@@ -71,6 +71,8 @@ def load_analysis(config: dict, run_type: str):
         latest = json.load(f)
 
     analysis_file = Path(latest["analysis_file"])
+    if not analysis_file.is_absolute():
+        analysis_file = SCRIPT_DIR / analysis_file
     if not analysis_file.exists():
         logger.error(f"Analysis file not found: {analysis_file}")
         return None
