@@ -234,6 +234,18 @@ def generate_index_page(env: Environment, config: dict, latest_analysis: dict):
                 "has_index": month_index.exists(),
             })
 
+    # Collect media sources for "O projektu" section
+    media_sources = (
+        [s["name"] for s in config.get("rss_sources", [])]
+        + [s["name"] for s in config.get("web_scrape", [])]
+        + [s["name"] for s in config.get("google_alerts", []) if s.get("category") == "media"]
+    )
+    watched_politicians = config.get("watched_names", {}).get("politicians", [])
+    watched_other = [
+        (item["name"] if isinstance(item, dict) else item)
+        for item in config.get("watched_names", {}).get("other", [])
+    ]
+
     template = env.get_template("index.html")
     context = {
         "date": now,
@@ -243,6 +255,9 @@ def generate_index_page(env: Environment, config: dict, latest_analysis: dict):
         "recent_days": recent_days,
         "stats": latest_analysis.get("stats", {}) if latest_analysis else {},
         "assets_path": "assets",
+        "media_sources": media_sources,
+        "watched_politicians": watched_politicians,
+        "watched_other": watched_other,
     }
 
     html = template.render(**context)

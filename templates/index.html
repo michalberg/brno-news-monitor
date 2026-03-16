@@ -138,11 +138,38 @@
         .about-section h2 {
             font-size: 1.1rem;
             font-weight: 700;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
         }
-        .about-section ul {
-            margin: 0.5rem 0 0 1rem;
+        .about-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        @media (max-width: 600px) {
+            .about-columns { grid-template-columns: 1fr; }
+        }
+        .about-col h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.6rem;
+        }
+        .about-col ul {
+            margin: 0;
             padding: 0;
+            list-style: none;
+        }
+        .about-col li {
+            padding: 0.2rem 0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border, #eee);
+        }
+        .about-col li:last-child { border-bottom: none; }
+        .about-col li.other-entity {
+            color: var(--text-muted);
         }
     </style>
 </head>
@@ -212,13 +239,30 @@
     <section class="about-section">
         <h2>ℹ️ O projektu</h2>
         <p>Brno News Monitor automaticky sleduje zpravodajské zdroje z Brna a Jihomoravského kraje.
-        Každý den ráno a odpoledne stahuje RSS feedy, analyzuje obsah pomocí umělé inteligence
+        Každý den v 7:00 stahuje RSS feedy a weby, analyzuje obsah pomocí umělé inteligence
         a generuje přehledný souhrn s důrazem na komunální politiku.</p>
-        <ul>
-            <li>🕖 Ranní přehled: 7:00</li>
-            <li>🕑 Odpolední přehled: 14:00</li>
-            <li>🌙 Denní souhrn: 20:00</li>
-        </ul>
+
+        <div class="about-columns">
+            <div class="about-col">
+                <h3>📡 Sledovaná média</h3>
+                <ul>
+                    {% for source in media_sources %}
+                    <li>{{ source }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="about-col">
+                <h3>👤 Sledované osoby a subjekty</h3>
+                <ul>
+                    {% for name in watched_politicians %}
+                    <li>{{ name }}</li>
+                    {% endfor %}
+                    {% for name in watched_other %}
+                    <li class="other-entity">{{ name }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
     </section>
 
 </main>
