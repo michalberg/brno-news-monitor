@@ -138,6 +138,15 @@
 .theme-dark .relevance-4, .theme-dark .relevance-3,
 .theme-dark .relevance-2, .theme-dark .relevance-1 { background: #21262d !important; color: #94a3b8 !important; }
 
+/* Petition stats in header */
+.petition-stats {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.75);
+  white-space: nowrap;
+}
+.petition-stats strong { color: #fff; }
+@media (max-width: 600px) { .petition-stats { display: none; } }
+
 /* Dark mode toggle button */
 .theme-toggle {
   background: rgba(255,255,255,0.1);

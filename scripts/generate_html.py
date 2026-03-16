@@ -7,6 +7,7 @@ import argparse
 import json
 import logging
 import sys
+import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -29,6 +30,16 @@ TEMPLATES_DIR = SCRIPT_DIR / "templates"
 def load_config() -> dict:
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def fetch_petition_stats() -> dict:
+    try:
+        with urllib.request.urlopen("https://jakebrno.cz/stats.php", timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+            return {"dnes": data.get("complete", 0), "celkem": data.get("total", 0)}
+    except Exception as e:
+        logger.warning(f"Could not fetch petition stats: {e}")
+        return None
 
 
 def load_analysis(config: dict, run_type: str):
@@ -71,7 +82,7 @@ def get_nav_dates(date: datetime, base_url: str) -> dict:
     }
 
 
-def generate_daily_page(env: Environment, analysis: dict, config: dict, run_type: str):
+def generate_daily_page(env: Environment, analysis: dict, config: dict, run_type: str, petition_stats: dict = None):
     tz = ZoneInfo(config["settings"]["timezone"])
     now = datetime.now(tz)
 
@@ -122,6 +133,7 @@ def generate_daily_page(env: Environment, analysis: dict, config: dict, run_type
             "zivotni_prostredi": "🌳",
             "ostatni": "📰",
         },
+        "petition_stats": petition_stats,
     }
 
     html = template.render(**context)
@@ -138,7 +150,7 @@ def generate_daily_page(env: Environment, analysis: dict, config: dict, run_type
     return main_output
 
 
-def generate_month_page(env: Environment, config: dict):
+def generate_month_page(env: Environment, config: dict, petition_stats: dict = None):
     import calendar as cal_module
     tz = ZoneInfo(config["settings"]["timezone"])
     now = datetime.now(tz)
@@ -189,6 +201,7 @@ def generate_month_page(env: Environment, config: dict):
         "next_month_exists": next_month_exists,
         "assets_path": "../../assets",
         "base_url": base_url,
+        "petition_stats": petition_stats,
     }
 
     html = template.render(**context)
@@ -199,7 +212,7 @@ def generate_month_page(env: Environment, config: dict):
     logger.info(f"Generated month page: {output_file}")
 
 
-def generate_index_page(env: Environment, config: dict, latest_analysis: dict):
+def generate_index_page(env: Environment, config: dict, latest_analysis: dict, petition_stats: dict = None):
     tz = ZoneInfo(config["settings"]["timezone"])
     now = datetime.now(tz)
 
@@ -264,6 +277,7 @@ def generate_index_page(env: Environment, config: dict, latest_analysis: dict):
         "media_sources": media_sources,
         "watched_politicians": watched_politicians,
         "watched_other": watched_other,
+        "petition_stats": petition_stats,
     }
 
     html = template.render(**context)
@@ -337,9 +351,12 @@ def main():
             },
         }
 
-    generate_daily_page(env, analysis, config, args.run)
-    generate_month_page(env, config)
-    generate_index_page(env, config, analysis)
+    petition_stats = fetch_petition_stats()
+    logger.info(f"Petition stats: {petition_stats}")
+
+    generate_daily_page(env, analysis, config, args.run, petition_stats)
+    generate_month_page(env, config, petition_stats)
+    generate_index_page(env, config, analysis, petition_stats)
 
     logger.info("HTML generation complete")
     return 0
