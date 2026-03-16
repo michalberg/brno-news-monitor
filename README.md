@@ -1,196 +1,140 @@
 # Zelený radar
 
-Automatický systém pro sledování brněnského zpravodajství s důrazem na komunální politiku. Každý den ráno a odpoledne stahuje RSS feedy z brněnských médií a oficiálních zdrojů, analyzuje obsah pomocí Claude AI a generuje přehledné HTML stránky publikované přes GitHub Pages.
+Automatický systém pro sledování brněnského zpravodajství s důrazem na komunální politiku. Každý den v 7:00 stahuje RSS feedy, scrapuje weby a Google Alerts, analyzuje obsah pomocí Claude AI a generuje přehledné HTML stránky publikované přes GitHub Pages.
+
+**Web:** https://michalberg.github.io/brno-news-monitor/
 
 ## Funkce
 
-- **Automatické stahování RSS feedů** – Český rozhlas Brno, Brněnský deník, iDNES Brno, Brno.cz, Jihomoravský kraj a volitelně Google Alerts
-- **AI analýza obsahu** – Claude AI kategorizuje každý článek, přiřazuje relevanci 1–10, identifikuje zmínky sledovaných politiků a vytváří krátká česká shrnutí
-- **Sledování osob** – Automatické monitorování zmínek konkrétních politiků (Vaňková, Grolich, Hladík, aj.)
-- **Prioritní sekce** – Komunální politika je vždy zobrazena na prvním místě se zvýrazněným stylem
-- **Denní přehledy** – Ranní (7:00), odpolední (14:00) a souhrnný večerní přehled (20:00)
-- **Emailové notifikace** – Volitelné odesílání přehledu na email přes SMTP
-- **Deduplication** – Každý článek je zobrazen pouze jednou, i při opakovaném spuštění
-- **GitHub Pages** – Výsledky jsou automaticky publikovány jako statické HTML stránky
-- **Archiv** – Přehledy jsou ukládány dle data a dostupné v měsíčním archivu
+- **Automatické stahování** – RSS feedy, webové zdroje bez RSS (Brněnská Drbna, Novinky.cz) a Google Alerts
+- **AI analýza** – Claude Haiku kategorizuje každý článek, přiřazuje relevanci 1–10, identifikuje sledované osoby a tvoří česká shrnutí
+- **Manažerské shrnutí dne** – 3 nejdůležitější věci z komunální politiky s přímými odkazy
+- **Sledování osob** – Monitorování zmínek politiků a dalších subjektů (Kometa, Zbrojovka, DPMB aj.)
+- **Emailové notifikace** – Přehled odesílán každý den na nakonfigurovaný email
+- **Deduplication** – Každý článek zobrazen pouze jednou i při opakovaném spuštění
+- **GitHub Pages** – Výsledky automaticky publikovány jako statické HTML
+- **Archiv** – Měsíční kalendář s proklikávatelnými dny
 
 ## Požadavky
 
 - Python 3.11+
-- Anthropic API klíč (Claude)
-- GitHub repozitář s povoleným GitHub Pages
-- Volitelně: SMTP účet pro emailové notifikace (např. Gmail App Password)
+- Anthropic API klíč (Claude Haiku)
+- GitHub repozitář s GitHub Pages nakonfigurovaným na větev `main`, složka `/docs`
+- SMTP účet pro emailové notifikace
 
-## Instalace a lokální spuštění
+## Lokální spuštění
 
 ```bash
-# Naklonujte repozitář
-git clone https://github.com/VAS_UZIVATEL/zeleny-radar.git
-cd zeleny-radar
+git clone https://github.com/michalberg/brno-news-monitor.git
+cd brno-news-monitor
 
-# Vytvořte virtuální prostředí
 python3 -m venv venv
-source venv/bin/activate  # Na Windows: venv\Scripts\activate
+source venv/bin/activate
 
-# Nainstalujte závislosti
 pip install -r requirements.txt
 
-# Nastavte environment variables
 export ANTHROPIC_API_KEY="sk-ant-..."
-export SMTP_USER="vas@gmail.com"          # Volitelné
-export SMTP_PASSWORD="app-password"       # Volitelné
+export SMTP_USER="radar.brno@zeleni.cz"
+export SMTP_PASSWORD="..."
 
-# Spusťte manuálně
 python scripts/fetch_rss.py --run manual
 python scripts/analyze.py --run manual
 python scripts/generate_html.py --run manual
+python scripts/send_email.py --run manual  # volitelné
 ```
 
-Vygenerované HTML stránky najdete v adresáři `docs/`.
+Vygenerované stránky jsou v adresáři `docs/`.
 
 ## Nastavení GitHub Secrets
 
-V repozitáři přejděte do **Settings → Secrets and variables → Actions** a přidejte tyto secrets:
+**Settings → Secrets and variables → Actions:**
 
-| Secret | Popis | Povinné |
-|--------|-------|---------|
-| `ANTHROPIC_API_KEY` | Váš Anthropic API klíč (získáte na console.anthropic.com) | Ano |
-| `SMTP_USER` | Email adresa odesílatele (např. vas@gmail.com) | Ne |
-| `SMTP_PASSWORD` | SMTP heslo nebo Gmail App Password | Ne |
+| Secret | Popis |
+|--------|-------|
+| `ANTHROPIC_API_KEY` | Anthropic API klíč z console.anthropic.com |
+| `SMTP_USER` | Email odesílatele (`radar.brno@zeleni.cz`) |
+| `SMTP_PASSWORD` | SMTP heslo |
 
-### Jak získat Gmail App Password
+## Nastavení GitHub Pages (jednorázově)
 
-1. Přejděte na [myaccount.google.com/security](https://myaccount.google.com/security)
-2. Zapněte dvoufaktorové ověření
-3. V sekci "Přihlašování do Googlu" klikněte na "Hesla aplikací"
-4. Vytvořte nové heslo pro "Pošta" a "Jiné zařízení" (název: Zelený radar)
-5. Vygenerované 16znakové heslo použijte jako `SMTP_PASSWORD`
+1. **Settings → Pages**
+2. Source: **Deploy from a branch**
+3. Branch: `main`, složka: `/docs`
+4. Uložit
 
-## Nastavení GitHub Pages
+Po nastavení se web automaticky aktualizuje po každém denním běhu.
 
-1. Přejděte do **Settings → Pages**
-2. Pod "Source" vyberte **Deploy from a branch**
-3. Vyberte větev `main` a adresář `/docs`
-4. Uložte – stránky budou dostupné na `https://VAS_UZIVATEL.github.io/zeleny-radar/`
+## Konfigurace
 
-## Nastavení Google Alerts
+Vše se konfiguruje v `config/sources.yaml`:
 
-Google Alerts umožňuje sledovat libovolná klíčová slova a dostávat RSS feed s výsledky.
+- **`rss_sources`** – RSS feedy médií a úřadů
+- **`google_alerts`** – Google Alerts RSS pro osoby a témata
+- **`web_scrape`** – Weby bez RSS (regex pattern pro extrakci odkazů)
+- **`watched_names.politicians`** – Seznam sledovaných politiků
+- **`watched_names.other`** – Další subjekty (volitelně s `only_with_keywords`)
+- **`notifications`** – SMTP nastavení a seznam příjemců
+- **`settings.base_url`** – Veřejná URL webu (pro správné odkazy v emailu)
 
-1. Přejděte na [google.com/alerts](https://www.google.com/alerts)
-2. Zadejte hledaný výraz (např. `"Brno zastupitelstvo"`)
-3. Klikněte na "Zobrazit možnosti" a nastavte:
-   - Jak často: "Okamžitě" nebo "Jednou denně"
-   - Zdroje: "Zprávy"
-   - Jazyk: čeština
-   - Oblast: Česká republika
-4. Pod "Doručovat do" vyberte **RSS feed**
-5. Klikněte na "Vytvořit upozornění"
-6. Klikněte na ikonu RSS u vytvořeného alertu a zkopírujte URL
-7. Vložte URL do `config/sources.yaml` místo `DOPLNIT_GOOGLE_ALERTS_RSS_URL`
-
-## Přidání nových zdrojů
-
-Upravte soubor `config/sources.yaml` – sekce `rss_sources`:
+### Přidání RSS zdroje
 
 ```yaml
 rss_sources:
   - name: "Název zdroje"
     url: "https://priklad.cz/rss.xml"
-    category: "media"  # nebo "official", "topic"
+    category: "media"
 ```
 
-## Sledované osoby
-
-V souboru `config/sources.yaml` upravte sekci `watched_names`:
+### Přidání sledované osoby
 
 ```yaml
 watched_names:
   politicians:
     - "Jméno Příjmení"
-  other:
-    - "Název organizace"
 ```
-
-## Emailové notifikace
-
-Zapněte a nakonfigurujte v `config/sources.yaml`:
-
-```yaml
-notifications:
-  enabled: true
-  recipients:
-    - "vas@email.cz"
-  smtp:
-    host: "smtp.gmail.com"
-    port: 587
-    use_tls: true
-```
-
-Nezapomeňte nastavit GitHub Secrets `SMTP_USER` a `SMTP_PASSWORD`.
 
 ## Struktura projektu
 
 ```
-zeleny-radar/
+brno-news-monitor/
 ├── config/
-│   └── sources.yaml          # Konfigurace zdrojů, sledovaných osob, nastavení
+│   └── sources.yaml          # Konfigurace zdrojů, osob, SMTP, base_url
 ├── scripts/
-│   ├── fetch_rss.py          # Stahování RSS feedů
-│   ├── analyze.py            # Analýza článků pomocí Claude API
-│   ├── generate_html.py      # Generování HTML stránek z Jinja2 šablon
-│   ├── send_email.py         # Odesílání emailových notifikací
-│   └── daily_summary.py      # Orchestrace denního souhrnu
+│   ├── fetch_rss.py          # Stahování RSS, Google Alerts a web scraping
+│   ├── analyze.py            # Analýza článků přes Claude API
+│   ├── generate_html.py      # Generování HTML z Jinja2 šablon
+│   └── send_email.py         # Odesílání emailových notifikací
 ├── templates/
-│   ├── daily.html            # Šablona pro denní přehled
-│   ├── month.html            # Šablona pro měsíční přehled
-│   └── index.html            # Šablona pro hlavní stránku
-├── docs/                     # Výstupní adresář (GitHub Pages)
-│   ├── index.html            # Hlavní stránka (přepisována při běhu)
-│   └── assets/
-│       ├── style.css         # CSS styly
-│       └── script.js         # JavaScript
-├── data/                     # Data z jednotlivých běhů (gitignore)
-│   └── .gitkeep
-├── .github/
-│   └── workflows/
-│       ├── morning.yml       # Ranní workflow (07:00 CET)
-│       ├── afternoon.yml     # Odpolední workflow (14:00 CET)
-│       └── daily-summary.yml # Denní souhrn (20:00 CET)
+│   ├── daily.html            # Denní přehled
+│   ├── month.html            # Měsíční kalendář
+│   └── index.html            # Hlavní stránka
+├── docs/                     # Výstup pro GitHub Pages
+│   ├── index.html
+│   ├── YYYY/MM/DD.html       # Denní přehledy
+│   └── assets/               # CSS a JS
+├── data/                     # Surová data a cache (seen_urls.json)
+├── .github/workflows/
+│   └── daily.yml             # Cron workflow – každý den 7:00 CET
 ├── requirements.txt
-├── .gitignore
-└── README.md
+└── .gitignore
 ```
 
-## Jak funguje pipeline
+## Pipeline
 
-1. **GitHub Actions** spustí workflow dle cronu
-2. `fetch_rss.py` stáhne všechny RSS feedy a uloží nové články do `data/YYYY/MM/DD/HH-MM/articles.json`
-3. `analyze.py` odešle články v dávkách (max 30) do Claude API, které je kategorizuje, přiřadí relevanci a identifikuje osoby; výsledek uloží do `analysis.json`
-4. `generate_html.py` načte analýzu a vygeneruje HTML stránky do `docs/` pomocí Jinja2 šablon
-5. `send_email.py` odešle HTML přehled emailem (volitelné)
-6. GitHub Actions commitne změny v `docs/` a `data/` do repozitáře
+1. **GitHub Actions** spustí `daily.yml` každý den v 7:00 CET
+2. `fetch_rss.py` stáhne zdroje, odfiltruje duplicity a uloží `articles.json`
+3. `analyze.py` odešle články v dávkách (max 30) do Claude Haiku, výsledek uloží jako `analysis.json`
+4. `generate_html.py` vygeneruje `docs/YYYY/MM/DD.html`, měsíční přehled a `index.html`
+5. `send_email.py` odešle HTML přehled na nakonfigurovaný email
+6. Workflow commitne `docs/` a `data/` a pushne do `main`
 7. GitHub Pages automaticky publikuje nový obsah
 
 ## Řešení problémů
 
-**Workflow selže na "Analyze articles"**
-- Zkontrolujte, zda je správně nastaven secret `ANTHROPIC_API_KEY`
-- Ověřte, zda má váš Anthropic účet dostatečný kredit
+**Workflow selže na analýze** – Zkontrolujte secret `ANTHROPIC_API_KEY` a kredit na Anthropic účtu.
 
-**Žádné články nejsou stahovány**
-- Zkontrolujte dostupnost RSS URL v prohlížeči
-- Některé zdroje mohou mít dočasné výpadky – to je normální
+**Žádné články** – Ověřte dostupnost RSS URL. Dočasné výpadky zdrojů jsou normální.
 
-**Emailové notifikace nefungují**
-- Zkontrolujte secrets `SMTP_USER` a `SMTP_PASSWORD`
-- Pro Gmail: ujistěte se, že používáte App Password, ne heslo Google účtu
-- Zkontrolujte, zda je v `config/sources.yaml` správně vyplněn email příjemce
+**Email nefunguje** – Zkontrolujte secrets `SMTP_USER` a `SMTP_PASSWORD` a příjemce v `config/sources.yaml`.
 
-**GitHub Pages nezobrazují nový obsah**
-- Počkejte 1–2 minuty po commitu
-- Zkontrolujte v Settings → Pages, zda je Pages správně nakonfigurováno
-
-## Licence
-
-MIT License – volně použitelné pro osobní i komerční účely.
+**Pages ukazují README** – Zkontrolujte Settings → Pages, zda je source nastaven na branch `main`, složka `/docs`.
