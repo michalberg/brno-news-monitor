@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.classList.toggle('theme-light', !isDark);
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
       updateIcon();
+      console.log('[theme] toggled, isDark=', isDark, 'html classes=', document.documentElement.className);
     });
   }
 
