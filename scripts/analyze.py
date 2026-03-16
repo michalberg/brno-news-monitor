@@ -261,7 +261,7 @@ INSTRUKCE:
 8. Kategorie "sport": zahrn POUZE clanky tykajici se stadionu, sportovni haly nebo jejich vystavby/rekonstrukce (napr. hala Komety, fotbalovy stadion Za Luzankami). Ostatni sportovni zpravy (vysledky zapasu, prestupy hracu apod.) uplne vynech — do zadne kategorie je nezarazuj.
 7. Kategorie "kriminalita": zahrn POUZE clanky, kde je kriminalita spojena s nekterym ze sledovanych politiku nebo verejnych cinitel. Beznou kriminalitu (kradeze, nehody, nasilne trestne ciny bez politickeho kontextu) uplne vynech — do zadne kategorie ji nezarazuj.
 
-VRAT POUZE VALIDNI JSON v tomto formatu (bez markdown backticks):
+VRAT POUZE VALIDNI JSON v tomto formatu (bez markdown backticks). DULEZITE: V retezci JSON escapuj vsechny uvozovky jako \" — zejmena v titulcich clanku ktere mohou obsahovat uvozovky.
 {{
   "analyzed_at": "ISO datetime",
   "categories": {{
@@ -306,17 +306,28 @@ VRAT POUZE VALIDNI JSON v tomto formatu (bez markdown backticks):
 
 
 def extract_json(text: str) -> dict:
-    """Extract and parse JSON from Claude response, handling markdown and extra text."""
-    # Always extract the outermost { ... } block — most robust approach
+    """Extract and parse JSON from Claude response, with repair fallback."""
+    from json_repair import repair_json
+
     start = text.find("{")
     end = text.rfind("}") + 1
-    if start != -1 and end > start:
-        try:
-            return json.loads(text[start:end])
-        except json.JSONDecodeError as e:
-            raise json.JSONDecodeError(f"Found JSON block but failed to parse: {e}", text, e.pos)
+    if start == -1 or end <= start:
+        raise json.JSONDecodeError("No JSON object found in response", text, 0)
 
-    raise json.JSONDecodeError("No JSON object found in response", text, 0)
+    blob = text[start:end]
+
+    # Try strict parse first
+    try:
+        return json.loads(blob)
+    except json.JSONDecodeError:
+        pass
+
+    # Repair and retry (handles unescaped quotes, missing commas, etc.)
+    repaired = repair_json(blob)
+    try:
+        return json.loads(repaired)
+    except json.JSONDecodeError as e:
+        raise json.JSONDecodeError(f"JSON repair failed: {e}", text, e.pos)
 
 
 def analyze_batch(client: anthropic.Anthropic, articles: list, config: dict) -> dict:
