@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-fetch_rss.py - Stahování RSS feedů pro Brno News Monitor
+fetch_rss.py - Stahování RSS feedů pro Zelený radar
 """
 
 import argparse
@@ -92,7 +92,7 @@ def fetch_feed(source: dict) -> list:
     try:
         # feedparser can handle the URL directly but we add timeout via requests
         headers = {
-            "User-Agent": "Mozilla/5.0 (compatible; BrnoNewsMonitor/1.0; +https://github.com/user/brno-news-monitor)"
+            "User-Agent": "Mozilla/5.0 (compatible; ZelenyRadar/1.0; +https://github.com/user/brno-news-monitor)"
         }
         response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()
@@ -171,7 +171,7 @@ def scrape_web(source: dict) -> list:
     logger.info(f"Scraping: {name} ({url})")
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; BrnoNewsMonitor/1.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; ZelenyRadar/1.0)",
         "Accept-Language": "cs,en;q=0.9",
     }
 
@@ -265,7 +265,7 @@ def _add_new(articles: list, seen_urls: set, new_seen_urls: set, all_articles: l
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Fetch RSS feeds for Brno News Monitor")
+    parser = argparse.ArgumentParser(description="Fetch RSS feeds for Zelený radar")
     parser.add_argument(
         "--run",
         choices=["daily", "manual"],

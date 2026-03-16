@@ -1,4 +1,4 @@
-# Brno News Monitor
+# Zelený radar
 
 Automatický systém pro sledování brněnského zpravodajství s důrazem na komunální politiku. Každý den ráno a odpoledne stahuje RSS feedy z brněnských médií a oficiálních zdrojů, analyzuje obsah pomocí Claude AI a generuje přehledné HTML stránky publikované přes GitHub Pages.
 
@@ -25,8 +25,8 @@ Automatický systém pro sledování brněnského zpravodajství s důrazem na k
 
 ```bash
 # Naklonujte repozitář
-git clone https://github.com/VAS_UZIVATEL/brno-news-monitor.git
-cd brno-news-monitor
+git clone https://github.com/VAS_UZIVATEL/zeleny-radar.git
+cd zeleny-radar
 
 # Vytvořte virtuální prostředí
 python3 -m venv venv
@@ -63,7 +63,7 @@ V repozitáři přejděte do **Settings → Secrets and variables → Actions** 
 1. Přejděte na [myaccount.google.com/security](https://myaccount.google.com/security)
 2. Zapněte dvoufaktorové ověření
 3. V sekci "Přihlašování do Googlu" klikněte na "Hesla aplikací"
-4. Vytvořte nové heslo pro "Pošta" a "Jiné zařízení" (název: Brno News Monitor)
+4. Vytvořte nové heslo pro "Pošta" a "Jiné zařízení" (název: Zelený radar)
 5. Vygenerované 16znakové heslo použijte jako `SMTP_PASSWORD`
 
 ## Nastavení GitHub Pages
@@ -71,7 +71,7 @@ V repozitáři přejděte do **Settings → Secrets and variables → Actions** 
 1. Přejděte do **Settings → Pages**
 2. Pod "Source" vyberte **Deploy from a branch**
 3. Vyberte větev `main` a adresář `/docs`
-4. Uložte – stránky budou dostupné na `https://VAS_UZIVATEL.github.io/brno-news-monitor/`
+4. Uložte – stránky budou dostupné na `https://VAS_UZIVATEL.github.io/zeleny-radar/`
 
 ## Nastavení Google Alerts
 
@@ -132,7 +132,7 @@ Nezapomeňte nastavit GitHub Secrets `SMTP_USER` a `SMTP_PASSWORD`.
 ## Struktura projektu
 
 ```
-brno-news-monitor/
+zeleny-radar/
 ├── config/
 │   └── sources.yaml          # Konfigurace zdrojů, sledovaných osob, nastavení
 ├── scripts/

@@ -1,4 +1,4 @@
-// Brno News Monitor - Client-side JS
+// Zelený radar - Client-side JS
 
 document.addEventListener('DOMContentLoaded', () => {
   // Smooth scroll to sections via hash links

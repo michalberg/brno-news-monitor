@@ -88,7 +88,7 @@ def send_email(config: dict, html_content: str, run_type: str) -> bool:
         "manual": "manuální přehled",
     }
 
-    subject = f"Brno News Monitor - {run_labels.get(run_type, run_type)} {now.strftime('%d. %m. %Y')}"
+    subject = f"Zelený radar - {run_labels.get(run_type, run_type)} {now.strftime('%d. %m. %Y')}"
 
     smtp_config = config["notifications"]["smtp"]
 
@@ -99,7 +99,7 @@ def send_email(config: dict, html_content: str, run_type: str) -> bool:
 
     # Plain text fallback
     plain_text = (
-        f"Brno News Monitor - {run_labels.get(run_type, run_type)}\n"
+        f"Zelený radar - {run_labels.get(run_type, run_type)}\n"
         f"{now.strftime('%d. %m. %Y')}\n\n"
         f"HTML verze není k dispozici v textovém klientu."
     )
