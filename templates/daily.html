@@ -15,7 +15,7 @@
             <a href="{{ base_url }}/">Hlavní stránka</a>
             <a href="{{ nav.month_path }}">Měsíční přehled</a>
             {% if petition_stats %}<a href="https://jakebrno.cz/admin.php" class="petition-stats" target="_blank" rel="noopener noreferrer">✍️ Dotazník: <strong>{{ petition_stats.dnes }}</strong> včera / <strong>{{ petition_stats.celkem }}</strong> celkem</a>{% endif %}
-            {% if an_signatures is not none %}<a href="https://actionnetwork.org/petitions/podporte-zelene-brno" class="petition-stats" target="_blank" rel="noopener noreferrer">📝 Petice: <strong>{{ an_signatures }}</strong> podpisů</a>{% endif %}
+            {% if an_signatures is not none %}<a href="https://petice.online/saliny" class="petition-stats" target="_blank" rel="noopener noreferrer">📝 Petice: <strong>{{ an_signatures }}</strong> podpisů</a>{% endif %}
             <button class="theme-toggle" id="theme-toggle" title="Přepnout režim">🌙</button>
         </nav>
     </div>
