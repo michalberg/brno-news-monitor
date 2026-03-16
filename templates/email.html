@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zelený radar – {{ date_str }}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:Arial,Helvetica,sans-serif;color:#1a202c;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:24px 0;">
+<tr><td align="center">
+<table width="620" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+
+  <!-- HEADER -->
+  <tr>
+    <td style="background:#1a56db;padding:20px 28px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td>
+            <a href="https://michalberg.github.io/brno-news-monitor/" style="font-size:20px;font-weight:700;color:#ffffff;text-decoration:none;">🌿 Zelený radar</a>
+          </td>
+          <td align="right">
+            <a href="{{ web_url }}" style="color:#bfdbfe;font-size:13px;text-decoration:none;">Zobrazit na webu →</a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- DATE BAR -->
+  <tr>
+    <td style="background:#1e40af;padding:10px 28px;">
+      <span style="color:#bfdbfe;font-size:13px;">{{ date_str }}</span>
+      <span style="color:#bfdbfe;font-size:13px;margin-left:12px;">📰 {{ total_articles }} článků</span>
+      {% if stats.komunalni_politika_count %}<span style="color:#bfdbfe;font-size:13px;margin-left:12px;">🏛️ {{ stats.komunalni_politika_count }} komunální politika</span>{% endif %}
+    </td>
+  </tr>
+
+  <!-- MANAŽERSKÉ SHRNUTÍ -->
+  {% set ms = managerske_shrnuti %}
+  {% if ms and ms.hlavni_body %}
+  {% set bg = '#fef2f2' if ms.uroven_dulezitosti == 'vysoka' else ('#fefce8' if ms.uroven_dulezitosti == 'stredni' else '#f0fdf4') %}
+  {% set border = '#ef4444' if ms.uroven_dulezitosti == 'vysoka' else ('#eab308' if ms.uroven_dulezitosti == 'stredni' else '#22c55e') %}
+  {% set icon = '🔴' if ms.uroven_dulezitosti == 'vysoka' else ('🟡' if ms.uroven_dulezitosti == 'stredni' else '🟢') %}
+  <tr>
+    <td style="padding:24px 28px 0;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:{{ bg }};border-left:4px solid {{ border }};border-radius:0 8px 8px 0;">
+        <tr>
+          <td style="padding:16px 20px;">
+            <div style="font-size:15px;font-weight:700;color:#1a202c;margin-bottom:12px;">{{ icon }} Shrnutí dne</div>
+            {% for bod in ms.hlavni_body %}
+            <div style="display:flex;margin-bottom:8px;">
+              <span style="color:#6b7280;margin-right:8px;flex-shrink:0;">•</span>
+              <span style="font-size:14px;line-height:1.5;">
+                {% if bod.link %}<a href="{{ bod.link }}" style="color:#1a56db;text-decoration:none;">{{ bod.text }}</a>{% else %}{{ bod.text }}{% endif %}
+              </span>
+            </div>
+            {% endfor %}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  {% endif %}
+
+  <!-- SLEDOVANÉ OSOBY -->
+  {% if person_mentions %}
+  <tr>
+    <td style="padding:20px 28px 0;">
+      <div style="font-size:15px;font-weight:700;color:#1a202c;margin-bottom:10px;">👤 Sledované osoby dnes</div>
+      {% for person, mentions in person_mentions.items() %}{% if mentions %}
+      <div style="margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:4px;">{{ person }}</div>
+        {% for mention in mentions[:2] %}
+        <div style="font-size:13px;color:#6b7280;padding-left:12px;margin-bottom:2px;">
+          → <a href="{{ mention.link }}" style="color:#1a56db;text-decoration:none;">{{ mention.title }}</a>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}{% endfor %}
+    </td>
+  </tr>
+  {% endif %}
+
+  <!-- KOMUNÁLNÍ POLITIKA -->
+  {% set komunalni = categories.get('komunalni_politika', []) %}
+  {% if komunalni %}
+  <tr>
+    <td style="padding:20px 28px 0;">
+      <div style="font-size:15px;font-weight:700;color:#1a202c;border-bottom:2px solid #1a56db;padding-bottom:6px;margin-bottom:12px;">🏛️ Komunální politika</div>
+      {% for article in komunalni[:6] %}
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;border:1px solid #e5e7eb;border-radius:8px;">
+        <tr>
+          <td style="padding:12px 14px;">
+            <div style="margin-bottom:4px;">
+              <span style="font-size:11px;background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:12px;font-weight:600;">{{ article.source }}</span>
+              <span style="font-size:11px;color:#9ca3af;margin-left:8px;">{{ article.published | format_date('%d. %m. %H:%M') }}</span>
+            </div>
+            <a href="{{ article.link }}" style="font-size:14px;font-weight:600;color:#1a56db;text-decoration:none;line-height:1.4;display:block;margin-bottom:4px;">{{ article.title }}</a>
+            {% if article.summary_cs %}<div style="font-size:13px;color:#6b7280;line-height:1.4;">{{ article.summary_cs }}</div>{% endif %}
+          </td>
+        </tr>
+      </table>
+      {% endfor %}
+    </td>
+  </tr>
+  {% endif %}
+
+  <!-- OSTATNÍ KATEGORIE -->
+  {% set other_cats = [('doprava','🚌','Doprava'),('ekonomika','💼','Ekonomika'),('skolstvi','🎓','Školství'),('zdravotnictvi','🏥','Zdravotnictví'),('zivotni_prostredi','🌳','Živ. prostředí'),('kultura','🎭','Kultura'),('sport','⚽','Sport'),('kriminalita','🚔','Kriminalita'),('ostatni','📰','Ostatní')] %}
+  {% for cat_key, cat_icon, cat_label in other_cats %}
+  {% set articles = categories.get(cat_key, []) %}
+  {% if articles %}
+  <tr>
+    <td style="padding:16px 28px 0;">
+      <div style="font-size:14px;font-weight:700;color:#374151;border-bottom:1px solid #e5e7eb;padding-bottom:5px;margin-bottom:10px;">{{ cat_icon }} {{ cat_label }}</div>
+      {% for article in articles[:4] %}
+      <div style="margin-bottom:8px;padding-left:8px;border-left:2px solid #e5e7eb;">
+        <a href="{{ article.link }}" style="font-size:13px;color:#1a56db;text-decoration:none;line-height:1.4;display:block;">{{ article.title }}</a>
+        <span style="font-size:11px;color:#9ca3af;">{{ article.source }}</span>
+      </div>
+      {% endfor %}
+    </td>
+  </tr>
+  {% endif %}
+  {% endfor %}
+
+  <!-- FOOTER -->
+  <tr>
+    <td style="padding:24px 28px;margin-top:16px;border-top:1px solid #e5e7eb;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="font-size:12px;color:#9ca3af;">
+            Zelený radar · Powered by Claude AI · {{ date_str }}<br>
+            <a href="https://github.com/michalberg/brno-news-monitor" style="color:#9ca3af;">github.com/michalberg/brno-news-monitor</a>
+          </td>
+          <td align="right">
+            <a href="{{ web_url }}" style="font-size:12px;color:#1a56db;text-decoration:none;">Celý přehled na webu →</a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+</table>
+</td></tr>
+</table>
+
+</body>
+</html>

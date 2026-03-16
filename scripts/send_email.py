@@ -4,6 +4,7 @@ send_email.py - Odesílání emailových notifikací
 """
 
 import argparse
+import json
 import logging
 import os
 import smtplib
@@ -15,6 +16,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import yaml
+from jinja2 import Environment, FileSystemLoader
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 CONFIG_PATH = Path(__file__).parent.parent / "config" / "sources.yaml"
 SCRIPT_DIR = Path(__file__).parent.parent
+TEMPLATES_DIR = SCRIPT_DIR / "templates"
 
 
 def load_config() -> dict:
@@ -32,20 +35,52 @@ def load_config() -> dict:
         return yaml.safe_load(f)
 
 
-def load_html_content(config: dict, run_type: str):
+def load_analysis(config: dict, run_type: str) -> dict:
+    data_dir = SCRIPT_DIR / config["settings"]["data_dir"]
+    latest_file = data_dir / f"latest_analysis_{run_type}.json"
+    if not latest_file.exists():
+        return {}
+    with open(latest_file) as f:
+        latest = json.load(f)
+    analysis_file = Path(latest["analysis_file"])
+    if not analysis_file.exists():
+        return {}
+    with open(analysis_file, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def render_email(config: dict, analysis: dict, run_type: str) -> str:
     tz = ZoneInfo(config["settings"]["timezone"])
     now = datetime.now(tz)
+    base_url = config["settings"].get("base_url", "")
 
-    output_dir = SCRIPT_DIR / config["settings"]["output_dir"]
+    env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)), autoescape=True)
 
-    html_file = output_dir / now.strftime("%Y/%m") / f"{now.strftime('%d')}.html"
+    def format_date(value, fmt="%d. %m. %H:%M"):
+        if isinstance(value, str):
+            try:
+                from dateutil import parser as dp
+                value = dp.parse(value)
+            except Exception:
+                return value
+        return value.strftime(fmt) if hasattr(value, "strftime") else str(value)
 
-    if not html_file.exists():
-        logger.error(f"HTML file not found: {html_file}")
-        return None
+    env.filters["format_date"] = format_date
 
-    with open(html_file, encoding="utf-8") as f:
-        return f.read()
+    total_articles = sum(len(v) for v in analysis.get("categories", {}).values())
+    web_url = f"{base_url}/{now.strftime('%Y/%m/%d')}.html"
+
+    context = {
+        "date_str": now.strftime("%d. %m. %Y"),
+        "total_articles": total_articles,
+        "categories": analysis.get("categories", {}),
+        "person_mentions": analysis.get("person_mentions", {}),
+        "managerske_shrnuti": analysis.get("managerske_shrnuti", {}),
+        "stats": analysis.get("stats", {}),
+        "web_url": web_url,
+    }
+
+    return env.get_template("email.html").render(**context)
 
 
 def send_email(config: dict, html_content: str, run_type: str) -> bool:
@@ -68,47 +103,20 @@ def send_email(config: dict, html_content: str, run_type: str) -> bool:
     tz = ZoneInfo(config["settings"]["timezone"])
     now = datetime.now(tz)
 
-    run_labels = {
-        "daily": "přehled zpráv",
-        "manual": "přehled zpráv",
-    }
-
-    subject = f"Zelený radar - {run_labels.get(run_type, run_type)} {now.strftime('%d. %m. %Y')}"
-
+    subject = f"Zelený radar – přehled zpráv {now.strftime('%d. %m. %Y')}"
     smtp_config = config["notifications"]["smtp"]
-    base_url = config["settings"].get("base_url", "")
-
-    # Make all root-relative links absolute for email clients
-    import re as _re
-    def make_absolute(html: str) -> str:
-        if not base_url:
-            return html
-        # href="/" -> href="base_url/"
-        html = _re.sub(r'href="/((?!/))', f'href="{base_url}/', html)
-        # src="/" -> src="base_url/"
-        html = _re.sub(r'src="/((?!/))', f'src="{base_url}/', html)
-        return html
-
-    html_content = make_absolute(html_content)
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = smtp_user
     msg["To"] = ", ".join(recipients)
 
-    # Plain text fallback
-    plain_text = (
-        f"Zelený radar - {run_labels.get(run_type, run_type)}\n"
-        f"{now.strftime('%d. %m. %Y')}\n\n"
-        f"HTML verze není k dispozici v textovém klientu."
-    )
+    plain_text = f"Zelený radar – přehled zpráv {now.strftime('%d. %m. %Y')}\nHTML verze není k dispozici v textovém klientu."
     msg.attach(MIMEText(plain_text, "plain", "utf-8"))
     msg.attach(MIMEText(html_content, "html", "utf-8"))
 
     try:
-        logger.info(
-            f"Connecting to SMTP server {smtp_config['host']}:{smtp_config['port']}"
-        )
+        logger.info(f"Connecting to SMTP {smtp_config['host']}:{smtp_config['port']}")
         with smtplib.SMTP(smtp_config["host"], smtp_config["port"]) as server:
             server.ehlo()
             if smtp_config.get("use_tls", True):
@@ -116,7 +124,6 @@ def send_email(config: dict, html_content: str, run_type: str) -> bool:
                 server.ehlo()
             server.login(smtp_user, smtp_password)
             server.sendmail(smtp_user, recipients, msg.as_string())
-
         logger.info(f"Email sent to {recipients}")
         return True
     except smtplib.SMTPException as e:
@@ -129,22 +136,19 @@ def send_email(config: dict, html_content: str, run_type: str) -> bool:
 
 def main():
     parser = argparse.ArgumentParser(description="Send email notifications")
-    parser.add_argument(
-        "--run",
-        choices=["daily", "manual"],
-        default="manual",
-    )
+    parser.add_argument("--run", choices=["daily", "manual"], default="manual")
     args = parser.parse_args()
 
     logger.info(f"Starting email send - run type: {args.run}")
 
     config = load_config()
+    analysis = load_analysis(config, args.run)
 
-    html_content = load_html_content(config, args.run)
-    if not html_content:
-        logger.error("Could not load HTML content for email")
+    if not analysis:
+        logger.error("No analysis data found")
         sys.exit(1)
 
+    html_content = render_email(config, analysis, args.run)
     success = send_email(config, html_content, args.run)
 
     if success:
