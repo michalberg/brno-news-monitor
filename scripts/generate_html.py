@@ -52,13 +52,13 @@ def load_analysis(config: dict, run_type: str):
 
 
 
-def get_nav_dates(date: datetime) -> dict:
+def get_nav_dates(date: datetime, base_url: str) -> dict:
     prev_date = date - timedelta(days=1)
     next_date = date + timedelta(days=1)
     today = datetime.now(ZoneInfo("Europe/Prague"))
 
     def date_to_path(d):
-        return f"/{d.strftime('%Y/%m/%d')}.html"
+        return f"{base_url}/{d.strftime('%Y/%m/%d')}.html"
 
     return {
         "prev": {"date": prev_date, "path": date_to_path(prev_date)},
@@ -67,7 +67,7 @@ def get_nav_dates(date: datetime) -> dict:
             if next_date.date() <= today.date()
             else None
         ),
-        "month_path": f"/{date.strftime('%Y/%m')}/index.html",
+        "month_path": f"{base_url}/{date.strftime('%Y/%m')}/index.html",
     }
 
 
@@ -77,7 +77,8 @@ def generate_daily_page(env: Environment, analysis: dict, config: dict, run_type
 
     template = env.get_template("daily.html")
 
-    nav = get_nav_dates(now)
+    base_url = config["settings"].get("base_url", "")
+    nav = get_nav_dates(now, base_url)
 
     # Count total articles
     total_articles = sum(
@@ -167,8 +168,9 @@ def generate_month_page(env: Environment, config: dict):
     else:
         next_year, next_month = year, month + 1
 
-    prev_month_path = f"/{prev_year:04d}/{prev_month:02d}/index.html"
-    next_month_path = f"/{next_year:04d}/{next_month:02d}/index.html"
+    base_url = config["settings"].get("base_url", "")
+    prev_month_path = f"{base_url}/{prev_year:04d}/{prev_month:02d}/index.html"
+    next_month_path = f"{base_url}/{next_year:04d}/{next_month:02d}/index.html"
     next_month_exists = (SCRIPT_DIR / config["settings"]["output_dir"] / f"{next_year:04d}/{next_month:02d}/index.html").exists()
 
     template = env.get_template("month.html")
@@ -202,9 +204,11 @@ def generate_index_page(env: Environment, config: dict, latest_analysis: dict):
     output_dir = SCRIPT_DIR / config["settings"]["output_dir"]
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    base_url = config["settings"].get("base_url", "")
+    docs_dir = output_dir
+
     # Collect recent days (last 30) that have HTML files
     recent_days = []
-    docs_dir = output_dir
     for year_dir in sorted(docs_dir.glob("????"), reverse=True)[:2]:
         for month_dir in sorted(year_dir.glob("??"), reverse=True)[:6]:
             for day_file in sorted(month_dir.glob("??.html"), reverse=True):
@@ -215,7 +219,7 @@ def generate_index_page(env: Environment, config: dict, latest_analysis: dict):
                     day_date = datetime(year, month, day_num, tzinfo=tz)
                     recent_days.append({
                         "date": day_date,
-                        "path": f"/{year_dir.name}/{month_dir.name}/{day_file.stem}.html",
+                        "path": f"{base_url}/{year_dir.name}/{month_dir.name}/{day_file.stem}.html",
                     })
                 except (ValueError, Exception):
                     pass
@@ -230,7 +234,7 @@ def generate_index_page(env: Environment, config: dict, latest_analysis: dict):
             months.append({
                 "year": int(year_dir.name),
                 "month": int(month_dir.name),
-                "path": f"/{year_dir.name}/{month_dir.name}/index.html",
+                "path": f"{base_url}/{year_dir.name}/{month_dir.name}/index.html",
                 "has_index": month_index.exists(),
             })
 
@@ -250,7 +254,7 @@ def generate_index_page(env: Environment, config: dict, latest_analysis: dict):
     context = {
         "date": now,
         "latest_analysis": latest_analysis,
-        "latest_path": f"/{now.strftime('%Y/%m/%d')}.html",
+        "latest_path": f"{base_url}/{now.strftime('%Y/%m/%d')}.html",
         "months": months,
         "recent_days": recent_days,
         "stats": latest_analysis.get("stats", {}) if latest_analysis else {},

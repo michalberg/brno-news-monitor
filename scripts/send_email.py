@@ -76,6 +76,20 @@ def send_email(config: dict, html_content: str, run_type: str) -> bool:
     subject = f"Zelený radar - {run_labels.get(run_type, run_type)} {now.strftime('%d. %m. %Y')}"
 
     smtp_config = config["notifications"]["smtp"]
+    base_url = config["settings"].get("base_url", "")
+
+    # Make all root-relative links absolute for email clients
+    import re as _re
+    def make_absolute(html: str) -> str:
+        if not base_url:
+            return html
+        # href="/" -> href="base_url/"
+        html = _re.sub(r'href="/((?!/))', f'href="{base_url}/', html)
+        # src="/" -> src="base_url/"
+        html = _re.sub(r'src="/((?!/))', f'src="{base_url}/', html)
+        return html
+
+    html_content = make_absolute(html_content)
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject

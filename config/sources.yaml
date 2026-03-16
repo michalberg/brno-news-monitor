@@ -4,6 +4,7 @@ settings:
   language: "cs"
   timezone: "Europe/Prague"
   summary_model: "claude-haiku-4-5-20251001"
+  base_url: "https://michalberg.github.io/brno-news-monitor"
 
 schedule:
   daily: "07:00"
