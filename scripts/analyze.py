@@ -316,26 +316,57 @@ VRAT POUZE VALIDNI JSON v tomto formatu (bez markdown backticks):
     return prompt
 
 
+def extract_json(text: str) -> dict:
+    """Extract and parse JSON from Claude response, handling markdown and extra text."""
+    text = text.strip()
+
+    # Strip markdown code fences
+    if text.startswith("```"):
+        lines = text.split("\n")
+        text = "\n".join(lines[1:])
+        if text.endswith("```"):
+            text = text[: text.rfind("```")]
+        text = text.strip()
+
+    # Try direct parse first
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+
+    # Extract the outermost JSON object (handles extra text before/after)
+    start = text.find("{")
+    end = text.rfind("}") + 1
+    if start != -1 and end > start:
+        try:
+            return json.loads(text[start:end])
+        except json.JSONDecodeError:
+            pass
+
+    raise json.JSONDecodeError("Could not extract valid JSON", text, 0)
+
+
 def analyze_batch(client: anthropic.Anthropic, articles: list, config: dict) -> dict:
     model = config["settings"]["summary_model"]
     prompt = build_analysis_prompt(articles, config)
 
     logger.info(f"Sending {len(articles)} articles to Claude API (model: {model})")
 
-    message = client.messages.create(
-        model=model,
-        max_tokens=8192,
-        messages=[{"role": "user", "content": prompt}],
-    )
-
-    response_text = message.content[0].text.strip()
-
-    # Clean potential markdown wrapping
-    if response_text.startswith("```"):
-        lines = response_text.split("\n")
-        response_text = "\n".join(lines[1:-1])
-
-    result = json.loads(response_text)
+    for attempt in range(2):
+        message = client.messages.create(
+            model=model,
+            max_tokens=8192,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        response_text = message.content[0].text
+        try:
+            result = extract_json(response_text)
+            break
+        except json.JSONDecodeError as e:
+            if attempt == 0:
+                logger.warning(f"JSON parse failed (attempt 1), retrying: {e}")
+            else:
+                raise
 
     # Apply keyword filters (e.g. Kometa/Zbrojovka only for stadium mentions)
     keyword_filters = get_keyword_filters(config)
