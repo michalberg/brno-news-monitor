@@ -1,0 +1,146 @@
+settings:
+  output_dir: "docs"
+  data_dir: "data"
+  language: "cs"
+  timezone: "Europe/Prague"
+  summary_model: "claude-haiku-4-5-20251001"
+
+schedule:
+  daily: "07:00"
+
+rss_sources:
+  - name: "Český rozhlas Brno"
+    url: "https://brno.rozhlas.cz/rss.xml"
+    category: "media"
+  - name: "Brněnský deník"
+    url: "https://brnensky.denik.cz/rss/server-original.html"
+    category: "media"
+  - name: "ČT24 Jihomoravský kraj"
+    url: "https://ct24.ceskatelevize.cz/rss/regiony/jihomoravsky-kraj"
+    category: "media"
+  - name: "Novinky.cz Jihomoravský kraj"
+    url: "https://www.novinky.cz/rss/jihomoravsky-kraj"
+    category: "media"
+  - name: "Jihomoravský kraj"
+    url: "https://www.kr-jihomoravsky.cz/Default.aspx?ID=30702&TypeID=12"
+    category: "official"
+
+google_alerts:
+  - name: "Jana Drápalová"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/8247072807617627841"
+    category: "person"
+  - name: "Natálie Vencovská"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/1641947791477730929"
+    category: "person"
+  - name: "Jasna Flamiková"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/11360334366602434223"
+    category: "person"
+  - name: "Kristýna Fuchsová"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/15649751760247318579"
+    category: "person"
+  - name: "Adam Zemek"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/3261078645705774257"
+    category: "person"
+  - name: "Marek Lahoda"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/9310340226663813718"
+    category: "person"
+  - name: "David Pokorný TU Brno"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/6202338712836168351"
+    category: "person"
+  - name: "Jitka Bidlová"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/6202338712836167564"
+    category: "person"
+  - name: "Fakt Brno"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/10424224635778950214"
+    category: "topic"
+  - name: "Milada Blatná"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/18321973900931729528"
+    category: "person"
+  - name: "Ivana Fajnorová"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/18321973900931727513"
+    category: "person"
+  - name: "Primátorka Vaňková"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/319154791958918307"
+    category: "person"
+  - name: "Seznam zprávy Brno"
+    url: "https://www.google.com/alerts/feeds/08122824726415264928/11623316135884821067"
+    category: "media"
+
+watched_names:
+  politicians:
+    - "Markéta Vaňková"
+    - "Jan Grolich"
+    - "René Černý"
+    - "Petr Hladík"
+    - "Tomáš Koláčný"
+    - "Robert Kerndl"
+    - "Filip Chvátal"
+    - "Jasna Flamiková"
+    - "Jana Drápalová"
+    - "Natálie Vencovská"
+    - "Kristýna Fuchsová"
+    - "Adam Zemek"
+    - "Marek Lahoda"
+    - "David Pokorný"
+    - "Jitka Bidlová"
+    - "Milada Blatná"
+    - "Ivana Fajnorová"
+  other:
+    - name: "Kometa Brno"
+      only_with_keywords: ["stadion", "hala", "zimní stadion", "Kajot Arena", "Winning Group Arena", "Arena Brno", "aréna", "stavba stadionu", "hokejová hala"]
+    - name: "Zbrojovka Brno"
+      only_with_keywords: ["stadion", "hala", "fotbalový stadion", "Městský stadion", "Zbrojovka aréna", "Za Lužánkami", "stavba stadionu", "nový stadion"]
+    - name: "DPMB"
+    - name: "Teplárny Brno"
+    - name: "Brněnské vodárny"
+
+analysis_focus:
+  high_priority:
+    - "komunální politika"
+    - "zastupitelstvo"
+    - "rada města"
+    - "magistrát"
+    - "volby"
+    - "koalice"
+    - "primátor"
+    - "hejtman"
+    - "radnice"
+  medium_priority:
+    - "doprava"
+    - "MHD"
+    - "územní plán"
+    - "nádraží"
+    - "stavba"
+    - "investice"
+    - "rozpočet"
+  general:
+    - "kultura"
+    - "sport"
+    - "vzdělání"
+    - "zdravotnictví"
+    - "bezpečnost"
+
+web_scrape:
+  - name: "Brněnská Drbna"
+    url: "https://brnenska.drbna.cz/zpravy.html"
+    category: "media"
+    article_link_pattern: 'href="(https://brnenska\.drbna\.cz/zpravy/[a-z-]+/\d+-[^"]+\.html)"'
+    title_pattern: 'href="https://brnenska\.drbna\.cz/zpravy/[a-z-]+/\d+-[^"]+\.html"[^>]*>([^<]+)</a>'
+    fetch_article_text: true
+  - name: "Novinky.cz Brno (sekce)"
+    url: "https://www.novinky.cz/sekce/domaci-zpravy-jihomoravsky-kraj-406"
+    category: "media"
+    article_link_pattern: 'href="(https://www\.novinky\.cz/clanek/[a-z0-9-]+-\d+)"'
+    title_pattern: 'href="https://www\.novinky\.cz/clanek/[a-z0-9-]+-\d+"[^>]*>([^<]{10,})</a>'
+    fetch_article_text: false
+  # Poznámka: seznamzpravy.cz/tag/brno-3112 je JS-rendered, nelze scrapovat bez headless browseru.
+  # Alternativa: přidat Google Alert "site:seznamzpravy.cz Brno"
+
+notifications:
+  enabled: true
+  recipients:
+    - "DOPLNIT_EMAIL"
+  smtp:
+    host: "smtp.gmail.com"
+    port: 587
+    use_tls: true

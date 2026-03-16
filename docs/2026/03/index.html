@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brno News – March 2026</title>
+    <link rel="stylesheet" href="../../assets/style.css">
+    <style>
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        .calendar-month-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        .cal-weekday {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 0.4rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .cal-day-empty {
+            /* spacer for days before start of month */
+        }
+        .cal-day {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .cal-day.no-data {
+            color: var(--text-muted);
+            background: var(--surface);
+            cursor: default;
+        }
+        .cal-day.has-data {
+            background: var(--primary-light, #e8f0fe);
+            color: var(--primary, #1a56db);
+            font-weight: 600;
+            border: 2px solid var(--primary, #1a56db);
+        }
+        .cal-day.has-data:hover {
+            background: var(--primary, #1a56db);
+            color: #fff;
+            transform: scale(1.06);
+        }
+        .cal-day.today {
+            box-shadow: 0 0 0 2px var(--accent, #e53e3e);
+        }
+        .cal-day .cal-day-num {
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+        .cal-day .cal-day-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            margin-top: 4px;
+            opacity: 0.6;
+        }
+        .month-section {
+            background: var(--card-bg, #fff);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow, 0 1px 4px rgba(0,0,0,.07));
+            margin-bottom: 2rem;
+        }
+        .month-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a href="/" class="logo">🏙️ Brno News Monitor</a>
+        <nav class="header-nav">
+            <a href="/">Hlavní stránka</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <div class="page-header">
+        <div class="page-title-row">
+            <h1>📅 Měsíční přehled</h1>
+        </div>
+    </div>
+
+    <div class="month-section">
+        <div class="calendar-header">
+            <a href="/2026/02/index.html" class="nav-btn nav-prev">← předchozí</a>
+            <h2 class="month-title">March 2026</h2>
+            
+            <span class="nav-btn nav-next disabled">Nejnovější ✓</span>
+            
+        </div>
+
+        <div class="calendar-grid">
+            <!-- Weekday headers -->
+            
+            <div class="cal-weekday">Po</div>
+            
+            <div class="cal-weekday">Út</div>
+            
+            <div class="cal-weekday">St</div>
+            
+            <div class="cal-weekday">Čt</div>
+            
+            <div class="cal-weekday">Pá</div>
+            
+            <div class="cal-weekday">So</div>
+            
+            <div class="cal-weekday">Ne</div>
+            
+
+            <!-- Empty cells before first day -->
+            
+            <div class="cal-day-empty"></div>
+            
+            <div class="cal-day-empty"></div>
+            
+            <div class="cal-day-empty"></div>
+            
+            <div class="cal-day-empty"></div>
+            
+            <div class="cal-day-empty"></div>
+            
+            <div class="cal-day-empty"></div>
+            
+
+            <!-- All days of month -->
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">1</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">2</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">3</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">4</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">5</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">6</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">7</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">8</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">9</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">10</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">11</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">12</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">13</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">14</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">15</span>
+            </div>
+            
+            
+            
+            <a href="/2026/03/16.html"
+               class="cal-day has-data today">
+                <span class="cal-day-num">16</span>
+                <span class="cal-day-dot"></span>
+            </a>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">17</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">18</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">19</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">20</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">21</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">22</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">23</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">24</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">25</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">26</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">27</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">28</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">29</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">30</span>
+            </div>
+            
+            
+            
+            <div class="cal-day no-data">
+                <span class="cal-day-num">31</span>
+            </div>
+            
+            
+        </div>
+    </div>
+
+    <div class="day-nav">
+        <a href="/" class="nav-btn nav-home">🏠 Domů</a>
+    </div>
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <div class="footer-left"><strong>Brno News Monitor</strong></div>
+        <div class="footer-right">Powered by Claude AI</div>
+    </div>
+</footer>
+
+<script src="../../assets/script.js"></script>
+</body>
+</html>

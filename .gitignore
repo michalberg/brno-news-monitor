@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Raw article/run data (large, regeneratable) — keep root pointer files
+data/20*/
+
+# Keep seen_urls and latest pointers
+!data/seen_urls.json
+!data/latest_*.json
+
+# macOS
+.DS_Store

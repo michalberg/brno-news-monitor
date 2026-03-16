@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brno News – {{ date_str }}</title>
+    <link rel="stylesheet" href="{{ assets_path }}/style.css">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container header-inner">
+        <a href="/" class="logo">🏙️ Brno News Monitor</a>
+        <nav class="header-nav">
+            <a href="/">Hlavní stránka</a>
+            <a href="{{ nav.month_path }}">Měsíční přehled</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- PAGE TITLE -->
+    <div class="page-header">
+        <div class="page-title-row">
+            <h1>Zpravodajský přehled</h1>
+            <div class="page-badges">
+                <span class="date-badge">{{ date_str }}</span>
+                <span class="run-badge daily">Denní souhrn</span>
+            </div>
+        </div>
+        <div class="stats-bar">
+            <span class="stat-pill">📰 <strong>{{ total_articles }}</strong> článků</span>
+            <span class="stat-pill">🏛️ <strong>{{ stats.komunalni_politika_count }}</strong> komunální politika</span>
+            {% if person_mentions %}<span class="stat-pill">👤 <strong>{{ person_mentions | length }}</strong> sledovaných osob</span>{% endif %}
+        </div>
+    </div>
+
+    <!-- NAV MACRO -->
+    {% macro day_nav() %}
+    <nav class="day-nav">
+        <a href="{{ nav.prev.path }}" class="nav-btn nav-prev">
+            <span class="nav-arrow">←</span> {{ nav.prev.date.strftime('%d. %m.') }}
+        </a>
+        <div class="nav-center">
+            <a href="{{ nav.month_path }}" class="nav-btn nav-month">📅 {{ date.strftime('%B %Y') }}</a>
+            <a href="/" class="nav-btn nav-home">🏠 Domů</a>
+        </div>
+        {% if nav.next %}
+        <a href="{{ nav.next.path }}" class="nav-btn nav-next">
+            {{ nav.next.date.strftime('%d. %m.') }} <span class="nav-arrow">→</span>
+        </a>
+        {% else %}
+        <span class="nav-btn nav-next disabled">Nejnovější ✓</span>
+        {% endif %}
+    </nav>
+    {% endmacro %}
+
+    {{ day_nav() }}
+
+    <!-- MANAŽERSKÉ SHRNUTÍ -->
+    {% set ms = managerske_shrnuti %}
+    {% if ms and ms.hlavni_body %}
+    <section class="manager-summary {{ ms.uroven_dulezitosti | default('stredni') }}">
+        <div class="ms-header">
+            <span class="ms-icon">
+                {% if ms.uroven_dulezitosti == 'vysoka' %}🔴
+                {% elif ms.uroven_dulezitosti == 'stredni' %}🟡
+                {% else %}🟢{% endif %}
+            </span>
+            <h2 class="ms-title">Shrnutí dne</h2>
+            <span class="ms-level {{ ms.uroven_dulezitosti | default('stredni') }}">
+                {% if ms.uroven_dulezitosti == 'vysoka' %}Důležité zprávy
+                {% elif ms.uroven_dulezitosti == 'stredni' %}Standardní den
+                {% else %}Klidný den{% endif %}
+            </span>
+        </div>
+
+        <ul class="ms-bullets">
+            {% for bod in ms.hlavni_body %}
+            <li>
+                {% if bod.link %}
+                <a href="{{ bod.link }}" target="_blank" rel="noopener noreferrer">{{ bod.text }}</a>
+                {% else %}
+                {{ bod.text }}
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+
+        {% if ms.sledovane_osoby_dnes %}
+        <div class="ms-footer">
+            <div class="ms-persons">
+                <span class="ms-label">👤 Ve zprávách dnes:</span>
+                {% for osoba in ms.sledovane_osoby_dnes %}
+                <a href="#sledovane-osoby" class="ms-person-tag">{{ osoba }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    <!-- SLEDOVANÉ OSOBY (hned za shrnutím) -->
+    {% if person_mentions %}
+    <section class="persons-section" id="sledovane-osoby">
+        <h2 class="category-title persons-title">👤 Sledované osoby dnes</h2>
+        <div class="persons-grid">
+            {% for person, mentions in person_mentions.items() %}
+            {% if mentions %}
+            <div class="person-card">
+                <h3 class="person-name">{{ person }}</h3>
+                <ul class="mention-list">
+                    {% for mention in mentions[:4] %}
+                    <li>
+                        <a href="{{ mention.link }}" target="_blank" rel="noopener noreferrer">{{ mention.title }}</a>
+                        {% if mention.context %}<span class="mention-context">{{ mention.context }}</span>{% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- QUICK JUMP -->
+    {% set all_cats = [('komunalni_politika', '🏛️', 'Komunální politika'), ('doprava', '🚌', 'Doprava'), ('ekonomika', '💼', 'Ekonomika'), ('skolstvi', '🎓', 'Školství'), ('zdravotnictvi', '🏥', 'Zdravotnictví'), ('zivotni_prostredi', '🌳', 'Živ. prostředí'), ('kultura', '🎭', 'Kultura'), ('sport', '⚽', 'Sport / Haly'), ('kriminalita', '🚔', 'Kriminalita'), ('ostatni', '📰', 'Ostatní')] %}
+    <div class="jump-bar">
+        {% for key, icon, label in all_cats %}
+        {% if categories.get(key) %}
+        <a href="#{{ key }}" class="jump-link {% if key == 'komunalni_politika' %}jump-priority{% endif %}">{{ icon }} {{ label }} <span class="jump-count">{{ categories[key] | length }}</span></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- KOMUNÁLNÍ POLITIKA -->
+    {% set komunalni = categories.get('komunalni_politika', []) %}
+    {% if komunalni %}
+    <section class="category-section priority-section" id="komunalni-politika">
+        <h2 class="category-title priority-title">
+            <span class="cat-icon">🏛️</span>
+            Komunální politika
+            <span class="article-count">{{ komunalni | length }}</span>
+        </h2>
+        <div class="articles-grid">
+            {% for article in komunalni %}
+            <article class="article-card priority-card">
+                <div class="article-meta">
+                    <span class="source-badge">{{ article.source }}</span>
+                    <span class="date-small">{{ article.published | format_date('%d. %m. %H:%M') }}</span>
+                    <span class="relevance-badge relevance-{{ article.get('relevance', 5) }}">★ {{ article.get('relevance', 5) }}</span>
+                </div>
+                <h3 class="article-title">
+                    <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">{{ article.title }}</a>
+                </h3>
+                {% if article.summary_cs %}
+                <p class="article-summary">{{ article.summary_cs }}</p>
+                {% endif %}
+                {% if article.get('persons') or article.get('tags') %}
+                <div class="article-tags">
+                    {% for person in article.get('persons', []) %}
+                    <span class="tag tag-person">👤 {{ person }}</span>
+                    {% endfor %}
+                    {% for tag in article.get('tags', []) %}
+                    <span class="tag tag-topic">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- OSTATNÍ KATEGORIE -->
+    {% set other_categories = [
+        ('doprava', '🚌', 'Doprava'),
+        ('ekonomika', '💼', 'Ekonomika'),
+        ('skolstvi', '🎓', 'Školství'),
+        ('zdravotnictvi', '🏥', 'Zdravotnictví'),
+        ('zivotni_prostredi', '🌳', 'Životní prostředí'),
+        ('kultura', '🎭', 'Kultura'),
+        ('sport', '⚽', 'Sport / Haly'),
+        ('kriminalita', '🚔', 'Kriminalita'),
+        ('ostatni', '📰', 'Ostatní'),
+    ] %}
+    {% for cat_key, cat_icon, cat_label in other_categories %}
+    {% set articles = categories.get(cat_key, []) %}
+    {% if articles %}
+    <section class="category-section" id="{{ cat_key }}">
+        <h2 class="category-title">
+            <span class="cat-icon">{{ cat_icon }}</span>
+            {{ cat_label }}
+            <span class="article-count">{{ articles | length }}</span>
+        </h2>
+        <div class="articles-grid">
+            {% for article in articles %}
+            <article class="article-card">
+                <div class="article-meta">
+                    <span class="source-badge">{{ article.source }}</span>
+                    <span class="date-small">{{ article.published | format_date('%d. %m. %H:%M') }}</span>
+                </div>
+                <h3 class="article-title">
+                    <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">{{ article.title }}</a>
+                </h3>
+                {% if article.summary_cs %}
+                <p class="article-summary">{{ article.summary_cs }}</p>
+                {% endif %}
+                {% if article.get('persons') or article.get('tags') %}
+                <div class="article-tags">
+                    {% for person in article.get('persons', []) %}
+                    <span class="tag tag-person">👤 {{ person }}</span>
+                    {% endfor %}
+                    {% for tag in article.get('tags', []) %}
+                    <span class="tag tag-topic">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    {% endfor %}
+
+    {% if total_articles == 0 %}
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>Pro tento den nejsou k dispozici žádné zprávy.</p>
+    </div>
+    {% endif %}
+
+    <!-- NAV BOTTOM -->
+    {{ day_nav() }}
+
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <div class="footer-left">
+            <strong>Brno News Monitor</strong>
+            <span class="footer-sep">·</span>
+            Powered by Claude AI
+        </div>
+        <div class="footer-right">
+            Vygenerováno {{ analysis.analyzed_at | format_date('%d. %m. %Y %H:%M') }}
+            <span class="footer-sep">·</span>
+            {{ stats.total_analyzed }} analyzováno, {{ stats.total_relevant }} relevantních
+        </div>
+    </div>
+</footer>
+
+<script src="{{ assets_path }}/script.js"></script>
+</body>
+</html>
