@@ -141,8 +141,12 @@
 /* Petition stats in header */
 .petition-stats {
   font-size: 0.8rem;
-  color: rgba(255,255,255,0.75);
+  color: rgba(255,255,255,0.85);
   white-space: nowrap;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  padding: 0.25rem 0.65rem;
 }
 .petition-stats strong { color: #fff; }
 @media (max-width: 600px) { .petition-stats { display: none; } }

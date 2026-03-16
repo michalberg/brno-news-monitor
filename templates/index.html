@@ -179,8 +179,7 @@
     <div class="container header-inner">
         <a href="{{ base_url }}/" class="logo">🏙️ Zelený radar</a>
         <nav class="header-nav">
-            <span class="header-tagline">Automatický přehled brněnského zpravodajství</span>
-            {% if petition_stats %}<span class="petition-stats">✍️ Petice: <strong>{{ petition_stats.dnes }}</strong> dnes / <strong>{{ petition_stats.celkem }}</strong> celkem</span>{% endif %}
+            {% if petition_stats %}<span class="petition-stats">✍️ Dotazník: <strong>{{ petition_stats.dnes }}</strong> včera / <strong>{{ petition_stats.celkem }}</strong> celkem</span>{% endif %}
             <button class="theme-toggle" id="theme-toggle" title="Přepnout režim">🌙</button>
         </nav>
     </div>
