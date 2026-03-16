@@ -34,8 +34,13 @@
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+/* ─── DARK MODE VARS ──────────────────────────────────────── */
+/* Applies when: system dark + no manual override, OR manual .theme-dark */
+@media (prefers-color-scheme: dark) { :root:not(.theme-light) { --dm: 1; } }
+:root.theme-dark { --dm: 1; }
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.theme-light) {
     --primary:        #93c5fd;
     --primary-light:  #1e3a5f;
     --primary-hover:  #60a5fa;
@@ -58,28 +63,95 @@
     --tag-topic-text: #6ee7b7;
     --tag-topic-border:#1a3d24;
   }
-  .site-header  { background: #010409 !important; }
-  .site-footer  { background: #010409 !important; }
-  .source-badge { background: #1e3a5f !important; color: #93c5fd !important; }
-  .nav-month    { background: #1e3a5f !important; border-color: #1e3a5f !important; color: #fff !important; }
-  .article-card { background: #161b22 !important; border-color: #21262d !important; }
-  .priority-card { background: #161b22 !important; }
-  .article-title a { color: #e2e8f0 !important; }
-  .article-title a:hover { color: #93c5fd !important; }
-  .jump-bar, .day-nav { background: #161b22 !important; border-color: #21262d !important; }
-  .nav-btn { background: #0d1117 !important; border-color: #21262d !important; color: #e2e8f0 !important; }
-  .stat-pill { background: #161b22 !important; border-color: #21262d !important; }
-  .manager-summary { background: #161b22 !important; border-color: #21262d !important; }
-  .manager-summary.vysoka  { background: #1c0505 !important; }
-  .manager-summary.stredni { background: #1c1400 !important; }
-  .manager-summary.nizka   { background: #0d2318 !important; }
-  .priority-section { background: #1c1600 !important; }
-  .person-card  { background: #161b22 !important; border-color: #21262d !important; }
-  .ms-bullets li a { color: #e2e8f0 !important; }
-  .ms-bullets li a:hover { color: #93c5fd !important; }
-  .relevance-6, .relevance-5, .relevance-4,
-  .relevance-3, .relevance-2, .relevance-1 { background: #21262d !important; color: #94a3b8 !important; }
 }
+:root.theme-dark {
+  --primary:        #93c5fd;
+  --primary-light:  #1e3a5f;
+  --primary-hover:  #60a5fa;
+  --accent:         #f87171;
+  --accent-hover:   #fca5a5;
+  --text:           #e2e8f0;
+  --text-muted:     #94a3b8;
+  --text-light:     #64748b;
+  --bg:             #0d1117;
+  --bg-card:        #161b22;
+  --bg-card-hover:  #1c2230;
+  --border:         #21262d;
+  --border-light:   #161b22;
+  --priority-bg:    #1c1600;
+  --priority-border:#3d3000;
+  --tag-person-bg:  #0d1f3c;
+  --tag-person-text:#93c5fd;
+  --tag-person-border:#1e3a5f;
+  --tag-topic-bg:   #0d2318;
+  --tag-topic-text: #6ee7b7;
+  --tag-topic-border:#1a3d24;
+}
+
+/* Element overrides for dark (both system and manual) */
+@media (prefers-color-scheme: dark) { :not(.theme-light) > .site-header,
+  :root:not(.theme-light) .site-header  { background: #010409 !important; }
+  :root:not(.theme-light) .site-footer  { background: #010409 !important; }
+  :root:not(.theme-light) .source-badge { background: #1e3a5f !important; color: #93c5fd !important; }
+  :root:not(.theme-light) .nav-month    { background: #1e3a5f !important; border-color: #1e3a5f !important; color: #fff !important; }
+  :root:not(.theme-light) .article-card { background: #161b22 !important; border-color: #21262d !important; }
+  :root:not(.theme-light) .priority-card { background: #161b22 !important; }
+  :root:not(.theme-light) .article-title a { color: #e2e8f0 !important; }
+  :root:not(.theme-light) .article-title a:hover { color: #93c5fd !important; }
+  :root:not(.theme-light) .jump-bar,
+  :root:not(.theme-light) .day-nav { background: #161b22 !important; border-color: #21262d !important; }
+  :root:not(.theme-light) .nav-btn { background: #0d1117 !important; border-color: #21262d !important; color: #e2e8f0 !important; }
+  :root:not(.theme-light) .stat-pill { background: #161b22 !important; border-color: #21262d !important; }
+  :root:not(.theme-light) .manager-summary { background: #161b22 !important; border-color: #21262d !important; }
+  :root:not(.theme-light) .manager-summary.vysoka  { background: #1c0505 !important; }
+  :root:not(.theme-light) .manager-summary.stredni { background: #1c1400 !important; }
+  :root:not(.theme-light) .manager-summary.nizka   { background: #0d2318 !important; }
+  :root:not(.theme-light) .priority-section { background: #1c1600 !important; }
+  :root:not(.theme-light) .person-card  { background: #161b22 !important; border-color: #21262d !important; }
+  :root:not(.theme-light) .ms-bullets li a { color: #e2e8f0 !important; }
+  :root:not(.theme-light) .ms-bullets li a:hover { color: #93c5fd !important; }
+  :root:not(.theme-light) .relevance-6, :root:not(.theme-light) .relevance-5,
+  :root:not(.theme-light) .relevance-4, :root:not(.theme-light) .relevance-3,
+  :root:not(.theme-light) .relevance-2, :root:not(.theme-light) .relevance-1 { background: #21262d !important; color: #94a3b8 !important; }
+}
+.theme-dark .site-header  { background: #010409 !important; }
+.theme-dark .site-footer  { background: #010409 !important; }
+.theme-dark .source-badge { background: #1e3a5f !important; color: #93c5fd !important; }
+.theme-dark .nav-month    { background: #1e3a5f !important; border-color: #1e3a5f !important; color: #fff !important; }
+.theme-dark .article-card { background: #161b22 !important; border-color: #21262d !important; }
+.theme-dark .priority-card { background: #161b22 !important; }
+.theme-dark .article-title a { color: #e2e8f0 !important; }
+.theme-dark .article-title a:hover { color: #93c5fd !important; }
+.theme-dark .jump-bar,
+.theme-dark .day-nav { background: #161b22 !important; border-color: #21262d !important; }
+.theme-dark .nav-btn { background: #0d1117 !important; border-color: #21262d !important; color: #e2e8f0 !important; }
+.theme-dark .stat-pill { background: #161b22 !important; border-color: #21262d !important; }
+.theme-dark .manager-summary { background: #161b22 !important; border-color: #21262d !important; }
+.theme-dark .manager-summary.vysoka  { background: #1c0505 !important; }
+.theme-dark .manager-summary.stredni { background: #1c1400 !important; }
+.theme-dark .manager-summary.nizka   { background: #0d2318 !important; }
+.theme-dark .priority-section { background: #1c1600 !important; }
+.theme-dark .person-card  { background: #161b22 !important; border-color: #21262d !important; }
+.theme-dark .ms-bullets li a { color: #e2e8f0 !important; }
+.theme-dark .ms-bullets li a:hover { color: #93c5fd !important; }
+.theme-dark .relevance-6, .theme-dark .relevance-5,
+.theme-dark .relevance-4, .theme-dark .relevance-3,
+.theme-dark .relevance-2, .theme-dark .relevance-1 { background: #21262d !important; color: #94a3b8 !important; }
+
+/* Dark mode toggle button */
+.theme-toggle {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.6rem;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.2); }
 
 /* ─── RESET ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

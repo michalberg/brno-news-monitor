@@ -97,6 +97,7 @@ def generate_daily_page(env: Environment, analysis: dict, config: dict, run_type
         "total_articles": total_articles,
         "nav": nav,
         "assets_path": "../../assets",
+        "base_url": base_url,
         "category_labels": {
             "komunalni_politika": "Komunální politika",
             "doprava": "Doprava",
@@ -187,6 +188,7 @@ def generate_month_page(env: Environment, config: dict):
         "next_month_path": next_month_path,
         "next_month_exists": next_month_exists,
         "assets_path": "../../assets",
+        "base_url": base_url,
     }
 
     html = template.render(**context)

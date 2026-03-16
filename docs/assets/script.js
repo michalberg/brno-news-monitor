@@ -14,6 +14,7 @@
 // Dark mode toggle button (runs immediately — script is at bottom of body so DOM is ready)
 (function() {
   const toggle = document.getElementById('theme-toggle');
+  console.log('[debug] script running, toggle el=', toggle);
   if (!toggle) return;
   const updateIcon = () => {
     toggle.textContent = document.documentElement.classList.contains('theme-dark') ? '☀️' : '🌙';
