@@ -293,6 +293,7 @@ def generate_index_page(env: Environment, config: dict, latest_analysis: dict, p
         "recent_days": recent_days,
         "stats": latest_analysis.get("stats", {}) if latest_analysis else {},
         "assets_path": "assets",
+        "base_url": base_url,
         "media_sources": media_sources,
         "watched_politicians": watched_politicians,
         "watched_other": watched_other,
