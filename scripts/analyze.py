@@ -354,7 +354,9 @@ def analyze_batch(client: anthropic.Anthropic, articles: list, config: dict) -> 
         except json.JSONDecodeError as e:
             if attempt == 0:
                 logger.warning(f"JSON parse failed (attempt 1), retrying: {e}")
+                logger.warning(f"Response was ({len(response_text)} chars): {response_text[:500]!r}")
             else:
+                logger.error(f"Response was ({len(response_text)} chars): {response_text[:500]!r}")
                 raise
 
     # Apply keyword filters (e.g. Kometa/Zbrojovka only for stadium mentions)
