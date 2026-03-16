@@ -307,32 +307,16 @@ VRAT POUZE VALIDNI JSON v tomto formatu (bez markdown backticks):
 
 def extract_json(text: str) -> dict:
     """Extract and parse JSON from Claude response, handling markdown and extra text."""
-    text = text.strip()
-
-    # Strip markdown code fences
-    if text.startswith("```"):
-        lines = text.split("\n")
-        text = "\n".join(lines[1:])
-        if text.endswith("```"):
-            text = text[: text.rfind("```")]
-        text = text.strip()
-
-    # Try direct parse first
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-
-    # Extract the outermost JSON object (handles extra text before/after)
+    # Always extract the outermost { ... } block — most robust approach
     start = text.find("{")
     end = text.rfind("}") + 1
     if start != -1 and end > start:
         try:
             return json.loads(text[start:end])
-        except json.JSONDecodeError:
-            pass
+        except json.JSONDecodeError as e:
+            raise json.JSONDecodeError(f"Found JSON block but failed to parse: {e}", text, e.pos)
 
-    raise json.JSONDecodeError("Could not extract valid JSON", text, 0)
+    raise json.JSONDecodeError("No JSON object found in response", text, 0)
 
 
 def analyze_batch(client: anthropic.Anthropic, articles: list, config: dict) -> dict:
