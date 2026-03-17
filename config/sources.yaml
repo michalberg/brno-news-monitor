@@ -25,6 +25,9 @@ rss_sources:
   - name: "Jihomoravský kraj"
     url: "https://www.kr-jihomoravsky.cz/Default.aspx?ID=30702&TypeID=12"
     category: "official"
+  - name: "Zdopravy.cz Brno"
+    url: "https://zdopravy.cz/tag/brno/feed/"
+    category: "media"
 
 google_alerts:
   - name: "Jana Drápalová"
