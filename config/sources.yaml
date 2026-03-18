@@ -148,6 +148,16 @@ notifications:
   enabled: true
   recipients:
     - "opavak@gmail.com"
+    - "jana.drapalova@zeleni.cz"
+    - "zbiejczuk@gmail.com"
+    - "matous.vencalek@zeleni.cz"
+    - "adela.misove@gmail.com"
+    - "natalie.vencovska@zeleni.cz"
+    - "jasna.flamikova@gmail.com"
+    - "rytirova.k@seznam.cz"
+    - "ivo.skopal@gmail.com"
+    - "jan.przywara@zeleni.cz"
+    - "jirina@vegalite.cz"
   smtp:
     host: "mail.zeleni.cz"
     port: 587

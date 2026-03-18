@@ -74,6 +74,13 @@
     <td style="background:#166534;padding:8px 24px;white-space:nowrap;font-size:13px;"><span style="color:#bbf7d0;">{{ date_str }}</span>&nbsp;&nbsp;<span style="color:#86efac;">📰 {{ total_articles }} článků</span>{% if stats.komunalni_politika_count %}&nbsp;&nbsp;<span style="color:#86efac;">🏛️ {{ stats.komunalni_politika_count }} komunální politika</span>{% endif %}</td>
   </tr>
 
+  <!-- WEB LINK BUTTON -->
+  <tr>
+    <td align="center" style="background:#f0fdf4;padding:12px 24px;border-bottom:1px solid #bbf7d0;">
+      <a href="{{ web_url }}" style="display:inline-block;background:#16a34a;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:10px 28px;border-radius:8px;">🌐 Celý přehled na webu →</a>
+    </td>
+  </tr>
+
   <!-- SHRNUTÍ DNE -->
   {% set ms = managerske_shrnuti %}
   {% if ms and ms.hlavni_body %}

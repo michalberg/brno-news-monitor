@@ -2,7 +2,7 @@ name: Daily News Fetch
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # 06:00 UTC = 07:00 CET
+    - cron: '30 5 * * *'  # 05:30 UTC = 06:30 CET
   workflow_dispatch:
     inputs:
       reason:
