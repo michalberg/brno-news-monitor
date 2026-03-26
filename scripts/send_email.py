@@ -9,6 +9,7 @@ import logging
 import os
 import smtplib
 import sys
+import urllib.request
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -35,6 +36,22 @@ def load_config() -> dict:
         return yaml.safe_load(f)
 
 
+def fetch_action_network_signatures():
+    api_key = os.environ.get("ACTION_NETWORK_API", "").strip()
+    if not api_key:
+        logger.warning("ACTION_NETWORK_API not set, skipping")
+        return None
+    try:
+        url = "https://actionnetwork.org/api/v2/petitions/603ad1fa-9d5a-4892-9558-87d7d04e4337/signatures/"
+        req = urllib.request.Request(url, headers={"OSDI-API-Token": api_key})
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+            return data.get("total") or data.get("total_signatures") or data.get("signatures_count")
+    except Exception as e:
+        logger.warning(f"Could not fetch Action Network signatures: {e}")
+        return None
+
+
 def load_analysis(config: dict, run_type: str) -> dict:
     data_dir = SCRIPT_DIR / config["settings"]["data_dir"]
     latest_file = data_dir / f"latest_analysis_{run_type}.json"
@@ -49,7 +66,7 @@ def load_analysis(config: dict, run_type: str) -> dict:
         return json.load(f)
 
 
-def render_email(config: dict, analysis: dict, run_type: str) -> str:
+def render_email(config: dict, analysis: dict, run_type: str, an_signatures=None) -> str:
     tz = ZoneInfo(config["settings"]["timezone"])
     now = datetime.now(tz)
     base_url = config["settings"].get("base_url", "")
@@ -78,6 +95,7 @@ def render_email(config: dict, analysis: dict, run_type: str) -> str:
         "managerske_shrnuti": analysis.get("managerske_shrnuti", {}),
         "stats": analysis.get("stats", {}),
         "web_url": web_url,
+        "an_signatures": an_signatures,
     }
 
     return env.get_template("email.html").render(**context)
@@ -148,7 +166,10 @@ def main():
         logger.error("No analysis data found")
         sys.exit(1)
 
-    html_content = render_email(config, analysis, args.run)
+    an_signatures = fetch_action_network_signatures()
+    logger.info(f"Action Network signatures: {an_signatures}")
+
+    html_content = render_email(config, analysis, args.run, an_signatures)
     success = send_email(config, html_content, args.run)
 
     if success:

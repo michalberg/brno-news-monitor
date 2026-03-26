@@ -39,11 +39,11 @@ def fetch_action_network_signatures():
         logger.warning("ACTION_NETWORK_API not set, skipping")
         return None
     try:
-        url = "https://actionnetwork.org/api/v2/petitions/603ad1fa-9d5a-4892-9558-87d7d04e4337/"
+        url = "https://actionnetwork.org/api/v2/petitions/603ad1fa-9d5a-4892-9558-87d7d04e4337/signatures/"
         req = urllib.request.Request(url, headers={"OSDI-API-Token": api_key})
         with urllib.request.urlopen(req, timeout=5) as resp:
             data = json.loads(resp.read().decode())
-            return data.get("total_signatures") or data.get("signatures_count")
+            return data.get("total") or data.get("total_signatures") or data.get("signatures_count")
     except Exception as e:
         logger.warning(f"Could not fetch Action Network signatures: {e}")
         return None

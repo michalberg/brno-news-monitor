@@ -48,6 +48,7 @@ jobs:
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          ACTION_NETWORK_API: ${{ secrets.ACTION_NETWORK_API }}
         run: python scripts/send_email.py --run daily
         continue-on-error: true
 
