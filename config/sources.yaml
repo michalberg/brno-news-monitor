@@ -28,6 +28,15 @@ rss_sources:
   - name: "Zdopravy.cz Brno"
     url: "https://zdopravy.cz/tag/brno/feed/"
     category: "media"
+  - name: "Městem na kole Brno"
+    url: "https://mestemnakole.cz/tag/brno/feed/"
+    category: "media"
+  - name: "Deník N Brno"
+    url: "https://denikn.cz/tag/brno/feed/"
+    category: "media"
+  - name: "Brno na kole"
+    url: "https://brnonakole.cz/feed/"
+    category: "media"
 
 google_alerts:
   - name: "Jana Drápalová"
@@ -164,6 +173,8 @@ notifications:
     - "pavla.spurna@gmail.com"
     - "katerina.spacova@gmail.com"
     - "david.oplatek@centrum.cz"
+    - "jakub.dlabaja@seznam.cz"
+    - "akarolyiova@gmail.com"
   smtp:
     host: "mail.zeleni.cz"
     port: 587
