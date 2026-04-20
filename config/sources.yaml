@@ -75,6 +75,9 @@ google_alerts:
   - name: "Primátorka Vaňková"
     url: "https://www.google.com/alerts/feeds/08122824726415264928/319154791958918307"
     category: "person"
+  - name: "Kamila Zlatušková"
+    url: "https://www.google.com/alerts/feeds/06697572710881405148/9044801360134662520"
+    category: "person"
   - name: "Seznam zprávy Brno"
     url: "https://www.google.com/alerts/feeds/08122824726415264928/11623316135884821067"
     category: "media"
@@ -99,9 +102,11 @@ watched_names:
     - "Adam Zemek"
     - "Marek Lahoda"
     - "David Pokorný"
+    - "Marek Soška"
     - "Jitka Bidlová"
     - "Milada Blatná"
     - "Ivana Fajnorová"
+    - "Kamila Zlatušková"
   other:
     - name: "Kometa Brno"
       only_with_keywords: ["stadion", "hala", "zimní stadion", "Kajot Arena", "Winning Group Arena", "Arena Brno", "aréna", "stavba stadionu", "hokejová hala"]
